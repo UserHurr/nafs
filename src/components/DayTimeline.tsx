@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { Check } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
@@ -9,16 +9,18 @@ import { taskCompletionKey, visibleTasks, type OwnershipFilter } from '../lib/me
 import { Icon } from '../lib/icons'
 import { vibrateDone } from '../lib/haptics'
 
-const ROW_HEIGHT = 56
+const START_HOUR = 6
+const END_HOUR = 23 // last hour row shown; the grid covers [6:00, 24:00)
+const HOURS_SHOWN = END_HOUR - START_HOUR + 1
+const RANGE_MIN = HOURS_SHOWN * 60
+const ROW_HEIGHT = 32
 const PX_PER_MIN = ROW_HEIGHT / 60
 const SNAP_MIN = 15
-const START_HOUR = 5
-const DAY_MIN = 24 * 60
-const displayHours = Array.from({ length: 24 }, (_, i) => (START_HOUR + i) % 24)
+const displayHours = Array.from({ length: HOURS_SHOWN }, (_, i) => START_HOUR + i)
 
-/** Minutes-from-midnight, remapped so the visible day starts at START_HOUR. */
+/** Minutes-from-midnight, remapped and clamped to the visible [6:00, 24:00) range. */
 function toDisplayOffset(minutes: number): number {
-  return (minutes - START_HOUR * 60 + DAY_MIN) % DAY_MIN
+  return Math.min(Math.max(minutes - START_HOUR * 60, 0), RANGE_MIN)
 }
 
 export function DayTimeline({
@@ -46,13 +48,6 @@ export function DayTimeline({
   )
 
   const containerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const now = new Date()
-    const rowIndex = toDisplayOffset(now.getHours() * 60 + now.getMinutes()) / 60
-    containerRef.current?.scrollTo({ top: Math.max(0, (rowIndex - 1) * ROW_HEIGHT) })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const handlePointerDown = (e: React.PointerEvent, task: Task) => {
     e.currentTarget.setPointerCapture(e.pointerId)
@@ -103,7 +98,7 @@ export function DayTimeline({
       )}
 
       <div className="timeline-scroll" ref={containerRef}>
-        <div className="timeline-grid" style={{ height: 24 * ROW_HEIGHT }}>
+        <div className="timeline-grid" style={{ height: HOURS_SHOWN * ROW_HEIGHT }}>
           {displayHours.map((h, i) => (
             <div key={i} className="timeline-row" style={{ height: ROW_HEIGHT }}>
               <span className="timeline-hour-label">{String(h).padStart(2, '0')}:00</span>
@@ -117,7 +112,7 @@ export function DayTimeline({
             const duration = t.duration ?? 30
             const isDragging = drag?.taskId === t.id
             const top = toDisplayOffset(minutes) * PX_PER_MIN + (isDragging ? drag.offsetMin * PX_PER_MIN : 0)
-            const height = Math.max(26, duration * PX_PER_MIN)
+            const height = Math.max(18, duration * PX_PER_MIN)
             const displayMinutes = isDragging ? minutes + drag.offsetMin : minutes
 
             return (

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
-import { addDays, addWeeks, dayNumber, fullDayLabel, isSameDay, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
+import { addWeeks, dayNumber, fullDayLabel, isSameDay, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
 import { TaskRow } from './TaskRow'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
@@ -27,13 +27,7 @@ export function WeekView({
 
   const days = weekDays(anchor)
   const selectedIso = toIso(selected)
-  const dayTasks = tasksOnDate(visibleTasks(tasks, myMemberId(), filter), selectedIso)
-
-  const goToDay = (d: Date, direction: number) => {
-    setDir(direction)
-    setSelected(d)
-    onAnchorChange(d)
-  }
+  const myTasks = visibleTasks(tasks, myMemberId(), filter)
 
   const goToWeek = (direction: number) => {
     setDir(direction)
@@ -42,8 +36,8 @@ export function WeekView({
   }
 
   const swipe = useSwipeNav(
-    () => goToDay(addDays(selected, -1), -1),
-    () => goToDay(addDays(selected, 1), 1),
+    () => goToWeek(-1),
+    () => goToWeek(1),
   )
 
   return (
@@ -69,15 +63,27 @@ export function WeekView({
         </button>
       </div>
 
-      <div key={selectedIso} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
-        <div className="day-header">{fullDayLabel(selected)}</div>
-
-        <div className="task-list">
-          {dayTasks.length === 0 && <div className="empty-state">Rien de prévu</div>}
-          {dayTasks.map((t) => (
-            <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
-          ))}
-        </div>
+      <div key={toIso(anchor)} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
+        {days.map((d) => {
+          const iso = toIso(d)
+          const dayTasks = tasksOnDate(myTasks, iso)
+          return (
+            <div key={iso} className="week-day-block">
+              <button
+                className={`day-header week-day-block-header ${isSameDay(d, selected) ? 'week-day-block-header-active' : ''}`}
+                onClick={() => setSelected(d)}
+              >
+                {fullDayLabel(d)}
+              </button>
+              <div className="task-list">
+                {dayTasks.length === 0 && <div className="empty-state empty-state-sm">Rien de prévu</div>}
+                {dayTasks.map((t) => (
+                  <TaskRow key={t.id} task={t} dateIso={iso} onEdit={() => setEditing(t)} />
+                ))}
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>

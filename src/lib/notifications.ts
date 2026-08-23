@@ -13,11 +13,11 @@ export async function showTaskNotification(title: string, body: string) {
   try {
     const reg = await navigator.serviceWorker?.getRegistration()
     if (reg) {
-      await reg.showNotification(title, { body, icon: '/icon-192.png', badge: '/icon-192.png' })
+      await reg.showNotification(title, { body, icon: `${import.meta.env.BASE_URL}icon-192.png`, badge: `${import.meta.env.BASE_URL}icon-192.png` })
       return
     }
   } catch {
     // fall through to plain Notification
   }
-  new Notification(title, { body, icon: '/icon-192.png' })
+  new Notification(title, { body, icon: `${import.meta.env.BASE_URL}icon-192.png` })
 }

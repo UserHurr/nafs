@@ -7,10 +7,18 @@ import { TaskRow } from './TaskRow'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
-import { visibleTasks } from '../lib/members'
+import { visibleTasks, type OwnershipFilter } from '../lib/members'
 import { useSwipeNav } from '../hooks/useSwipeNav'
 
-export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChange: (d: Date) => void }) {
+export function WeekView({
+  anchor,
+  onAnchorChange,
+  filter,
+}: {
+  anchor: Date
+  onAnchorChange: (d: Date) => void
+  filter: OwnershipFilter
+}) {
   const tasks = useStore((s) => s.tasks)
   const [selected, setSelected] = useState(anchor)
   const [showAdd, setShowAdd] = useState(false)
@@ -19,12 +27,18 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
 
   const days = weekDays(anchor)
   const selectedIso = toIso(selected)
-  const dayTasks = tasksOnDate(visibleTasks(tasks, myMemberId()), selectedIso)
+  const dayTasks = tasksOnDate(visibleTasks(tasks, myMemberId(), filter), selectedIso)
 
   const goToDay = (d: Date, direction: number) => {
     setDir(direction)
     setSelected(d)
     onAnchorChange(d)
+  }
+
+  const goToWeek = (direction: number) => {
+    setDir(direction)
+    setSelected((s) => addWeeks(s, direction))
+    onAnchorChange(addWeeks(anchor, direction))
   }
 
   const swipe = useSwipeNav(
@@ -35,7 +49,7 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
   return (
     <div className="view-container" {...swipe}>
       <div className="week-nav">
-        <button className="nav-arrow" onClick={() => onAnchorChange(addWeeks(anchor, -1))}>
+        <button className="nav-arrow" onClick={() => goToWeek(-1)}>
           <ChevronLeft size={18} />
         </button>
         <div className="week-strip">
@@ -50,7 +64,7 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
             </button>
           ))}
         </div>
-        <button className="nav-arrow" onClick={() => onAnchorChange(addWeeks(anchor, 1))}>
+        <button className="nav-arrow" onClick={() => goToWeek(1)}>
           <ChevronRight size={18} />
         </button>
       </div>

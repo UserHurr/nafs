@@ -5,8 +5,9 @@ import { tasksOnDate } from '../lib/recurrence'
 import { minutesToTime, timeToMinutes } from '../lib/dates'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
-import { taskCompletionKey, visibleTasks } from '../lib/members'
+import { taskCompletionKey, visibleTasks, type OwnershipFilter } from '../lib/members'
 import { Icon } from '../lib/icons'
+import { vibrateDone } from '../lib/haptics'
 
 const ROW_HEIGHT = 56
 const PX_PER_MIN = ROW_HEIGHT / 60
@@ -23,9 +24,11 @@ function toDisplayOffset(minutes: number): number {
 export function DayTimeline({
   dateIso,
   onEditTask,
+  filter,
 }: {
   dateIso: string
   onEditTask: (task: Task) => void
+  filter: OwnershipFilter
 }) {
   const tasks = useStore((s) => s.tasks)
   const categories = useStore((s) => s.categories)
@@ -34,7 +37,7 @@ export function DayTimeline({
   const updateTask = useStore((s) => s.updateTask)
 
   const me = myMemberId()
-  const dayTasks = tasksOnDate(visibleTasks(tasks, me), dateIso)
+  const dayTasks = tasksOnDate(visibleTasks(tasks, me, filter), dateIso)
   const allDayTasks = dayTasks.filter((t) => t.timeType === 'allday')
   const timedTasks = dayTasks.filter((t) => t.timeType === 'timed' && t.startTime)
 
@@ -134,6 +137,7 @@ export function DayTimeline({
                   className="timeline-task-check"
                   onClick={(e) => {
                     e.stopPropagation()
+                    if (!done) vibrateDone()
                     toggleTaskDone(t.id, dateIso)
                   }}
                 >

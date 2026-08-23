@@ -7,6 +7,8 @@ import { StatsPage } from './pages/StatsPage'
 import { useReminderChecker } from './hooks/useReminderChecker'
 import { useCloudSync } from './hooks/useCloudSync'
 import { useThemeStore } from './themeStore'
+import { Toast } from './components/Toast'
+import { Onboarding } from './components/Onboarding'
 import './App.css'
 
 function App() {
@@ -30,6 +32,8 @@ function App() {
         {tab === 'stats' && <StatsPage />}
       </main>
       <BottomNav active={tab} onChange={setTab} />
+      <Toast />
+      <Onboarding />
     </div>
   )
 }

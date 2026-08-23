@@ -8,6 +8,8 @@ import { OwnerPicker } from '../components/OwnerPicker'
 import { myMemberId } from '../syncStore'
 import { isShared, routineCompletionKey, visibleRoutineItems } from '../lib/members'
 import { Icon, routineIconChoices } from '../lib/icons'
+import { useToastStore } from '../toastStore'
+import { vibrateDone } from '../lib/haptics'
 import type { RoutineType } from '../types'
 
 function RoutineSection({
@@ -25,6 +27,7 @@ function RoutineSection({
   const routineCompletions = useStore((s) => s.routineCompletions)
   const addRoutineItem = useStore((s) => s.addRoutineItem)
   const removeRoutineItem = useStore((s) => s.removeRoutineItem)
+  const showToast = useToastStore((s) => s.show)
   const me = myMemberId()
   const iso = todayIso()
   const { fire, node } = useConfettiBurst()
@@ -43,6 +46,7 @@ function RoutineSection({
     if (!wasDone) {
       const rect = e.currentTarget.getBoundingClientRect()
       fire(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      vibrateDone()
     }
     toggleRoutineItem(type, itemId, iso)
   }
@@ -88,7 +92,15 @@ function RoutineSection({
                   <Icon name={partner.icon} size={14} />
                 </span>
               )}
-              <button className="task-delete" onClick={() => removeRoutineItem(type, item.id)}>
+              <button
+                className="task-delete"
+                onClick={() => {
+                  removeRoutineItem(type, item.id)
+                  showToast('Étape supprimée', () =>
+                    addRoutineItem(type, item.title, item.icon, item.ownerId),
+                  )
+                }}
+              >
                 <Trash2 size={15} />
               </button>
             </div>

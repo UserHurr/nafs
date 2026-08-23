@@ -5,8 +5,17 @@ import { DayTimeline } from './DayTimeline'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
 import { useSwipeNav } from '../hooks/useSwipeNav'
+import type { OwnershipFilter } from '../lib/members'
 
-export function DayView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChange: (d: Date) => void }) {
+export function DayView({
+  anchor,
+  onAnchorChange,
+  filter,
+}: {
+  anchor: Date
+  onAnchorChange: (d: Date) => void
+  filter: OwnershipFilter
+}) {
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [dir, setDir] = useState(1)
@@ -38,7 +47,7 @@ export function DayView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChan
       </div>
 
       <div key={dateIso} className="view-slide" style={{ marginTop: 14, '--dir': dir } as React.CSSProperties}>
-        <DayTimeline dateIso={dateIso} onEditTask={setEditing} />
+        <DayTimeline dateIso={dateIso} onEditTask={setEditing} filter={filter} />
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>

@@ -7,6 +7,8 @@ import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
 import { OwnerPicker } from './OwnerPicker'
 import { Icon, categoryIconChoices } from '../lib/icons'
+import { categoryColorChoices } from '../lib/colors'
+import { useToastStore } from '../toastStore'
 
 const weekdayLabels = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 
@@ -31,6 +33,7 @@ export function TaskFormModal({
   const addTask = useStore((s) => s.addTask)
   const updateTask = useStore((s) => s.updateTask)
   const removeTask = useStore((s) => s.removeTask)
+  const showToast = useToastStore((s) => s.show)
 
   const [title, setTitle] = useState(editingTask?.title ?? '')
   const [ownerId, setOwnerId] = useState(editingTask?.ownerId ?? myMemberId())
@@ -54,6 +57,7 @@ export function TaskFormModal({
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [newCatName, setNewCatName] = useState('')
   const [newCatIcon, setNewCatIcon] = useState('sparkles')
+  const [newCatColor, setNewCatColor] = useState(categoryColorChoices[0])
 
   const toggleDay = (d: number) => {
     setDaysOfWeek((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()))
@@ -94,9 +98,7 @@ export function TaskFormModal({
 
   const handleAddCategory = () => {
     if (!newCatName.trim()) return
-    const colorPalette = ['#6366f1', '#f97316', '#3b82f6', '#22c55e', '#ec4899', '#a855f7', '#eab308', '#14b8a6']
-    const color = colorPalette[categories.length % colorPalette.length]
-    addCategory({ name: newCatName.trim(), icon: newCatIcon, color })
+    addCategory({ name: newCatName.trim(), icon: newCatIcon, color: newCatColor })
     setNewCatName('')
     setShowNewCategory(false)
   }
@@ -148,6 +150,16 @@ export function TaskFormModal({
                 </button>
               ))}
             </div>
+            <div className="color-swatch-row">
+              {categoryColorChoices.map((c) => (
+                <button
+                  key={c}
+                  className={`color-swatch ${newCatColor === c ? 'color-swatch-active' : ''}`}
+                  style={{ background: c }}
+                  onClick={() => setNewCatColor(c)}
+                />
+              ))}
+            </div>
             <div className="row-gap">
               <input
                 className="text-input"
@@ -173,8 +185,8 @@ export function TaskFormModal({
         </div>
 
         {timeType === 'timed' && (
-          <div className="row-gap">
-            <div style={{ flex: 1 }}>
+          <div className="time-duration-row">
+            <div className="time-duration-field">
               <label className="field-label">Heure</label>
               <input
                 className="text-input"
@@ -183,7 +195,7 @@ export function TaskFormModal({
                 onChange={(e) => setStartTime(e.target.value)}
               />
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="time-duration-field">
               <label className="field-label">Durée (min)</label>
               <input
                 className="text-input"
@@ -287,8 +299,13 @@ export function TaskFormModal({
             <button
               className="btn-danger"
               onClick={() => {
-                removeTask(editingTask.id)
+                const snapshot = editingTask
+                removeTask(snapshot.id)
                 onClose()
+                showToast('Tâche supprimée', () => {
+                  const { id: _id, createdAt: _createdAt, ...rest } = snapshot
+                  addTask(rest)
+                })
               }}
             >
               <Trash2 size={15} /> Supprimer

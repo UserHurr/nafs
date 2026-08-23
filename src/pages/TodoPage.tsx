@@ -7,6 +7,8 @@ import { OwnerPicker } from '../components/OwnerPicker'
 import { myMemberId } from '../syncStore'
 import { isShared, visibleTodos } from '../lib/members'
 import { Icon } from '../lib/icons'
+import { useToastStore } from '../toastStore'
+import { vibrateDone } from '../lib/haptics'
 import type { Priority, Todo } from '../types'
 
 const priorityMeta: Record<Priority, { label: string; color: string }> = {
@@ -18,6 +20,8 @@ const priorityMeta: Record<Priority, { label: string; color: string }> = {
 function TodoRow({ todo }: { todo: Todo }) {
   const toggleTodo = useStore((s) => s.toggleTodo)
   const removeTodo = useStore((s) => s.removeTodo)
+  const addTodo = useStore((s) => s.addTodo)
+  const showToast = useToastStore((s) => s.show)
   const setTodoPriority = useStore((s) => s.setTodoPriority)
   const addSubtask = useStore((s) => s.addSubtask)
   const toggleSubtask = useStore((s) => s.toggleSubtask)
@@ -43,6 +47,7 @@ function TodoRow({ todo }: { todo: Todo }) {
     if (!done) {
       const rect = e.currentTarget.getBoundingClientRect()
       fire(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      vibrateDone()
     }
     toggleTodo(todo.id)
   }
@@ -75,7 +80,13 @@ function TodoRow({ todo }: { todo: Todo }) {
           <Icon name={partner.icon} size={14} />
         </span>
       )}
-      <button className="task-delete" onClick={() => removeTodo(todo.id)}>
+      <button
+        className="task-delete"
+        onClick={() => {
+          removeTodo(todo.id)
+          showToast('Tâche supprimée', () => addTodo(todo.title, todo.ownerId, todo.dueDate, todo.priority))
+        }}
+      >
         <Trash2 size={15} />
       </button>
 

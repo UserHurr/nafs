@@ -17,12 +17,20 @@ import { TaskRow } from './TaskRow'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
-import { visibleTasks } from '../lib/members'
+import { visibleTasks, type OwnershipFilter } from '../lib/members'
 import { useSwipeNav } from '../hooks/useSwipeNav'
 
 const weekdayHeaders = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
-export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChange: (d: Date) => void }) {
+export function MonthView({
+  anchor,
+  onAnchorChange,
+  filter,
+}: {
+  anchor: Date
+  onAnchorChange: (d: Date) => void
+  filter: OwnershipFilter
+}) {
   const tasks = useStore((s) => s.tasks)
   const categories = useStore((s) => s.categories)
   const [selected, setSelected] = useState(anchor)
@@ -30,13 +38,14 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
   const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [dir, setDir] = useState(1)
 
-  const myTasks = visibleTasks(tasks, myMemberId())
+  const myTasks = visibleTasks(tasks, myMemberId(), filter)
   const days = monthGrid(anchor)
   const selectedIso = toIso(selected)
   const dayTasks = tasksOnDate(myTasks, selectedIso)
 
   const goToMonth = (d: Date, direction: number) => {
     setDir(direction)
+    setSelected((s) => addMonths(s, direction))
     onAnchorChange(d)
   }
 

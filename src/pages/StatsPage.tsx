@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BarChart3, Bell, Flame, Moon, Sunrise, Users } from 'lucide-react'
+import { BarChart3, Bell, Download, Flame, Moon, Sunrise, Users } from 'lucide-react'
 import { useStore } from '../store'
 import { dayCompletion, heatmapDays, routineStreak, sharedWeeklySummary, weeklySummary } from '../lib/stats'
 import { toIso, isToday } from '../lib/dates'
@@ -8,6 +8,8 @@ import { SyncSection } from '../components/SyncSection'
 import { myMemberId } from '../syncStore'
 import { useThemeStore, type Theme } from '../themeStore'
 import { Icon } from '../lib/icons'
+import { CategoryManager } from '../components/CategoryManager'
+import { exportDataAsJson } from '../lib/exportData'
 
 const weekdayLabels = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -146,11 +148,25 @@ export function StatsPage() {
         )}
       </div>
 
+      <div className="section-label">Catégories</div>
+      <CategoryManager />
+
       <div className="section-label">Thème</div>
       <ThemePicker />
 
       <div className="section-label">Synchronisation</div>
       <SyncSection />
+
+      <div className="section-label">Données</div>
+      <div className="stats-card">
+        <div className="stats-sub">
+          Télécharge une copie de toutes tes données (tâches, to-do, routines) dans un fichier — un filet de
+          sécurité indépendant de la synchronisation cloud.
+        </div>
+        <button className="btn-ghost" style={{ marginTop: 10 }} onClick={exportDataAsJson}>
+          <Download size={15} /> Exporter mes données
+        </button>
+      </div>
     </div>
   )
 }

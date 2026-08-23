@@ -6,20 +6,22 @@ import { addYears, isToday, monthGrid, toIso } from '../lib/dates'
 import { format, isSameMonth as sameMonthFn } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { myMemberId } from '../syncStore'
-import { visibleTasks } from '../lib/members'
+import { visibleTasks, type OwnershipFilter } from '../lib/members'
 import { useSwipeNav } from '../hooks/useSwipeNav'
 
 export function YearView({
   anchor,
   onAnchorChange,
   onSelectMonth,
+  filter,
 }: {
   anchor: Date
   onAnchorChange: (d: Date) => void
   onSelectMonth: (d: Date) => void
+  filter: OwnershipFilter
 }) {
   const tasks = useStore((s) => s.tasks)
-  const myTasks = visibleTasks(tasks, myMemberId())
+  const myTasks = visibleTasks(tasks, myMemberId(), filter)
   const year = anchor.getFullYear()
   const months = Array.from({ length: 12 }, (_, i) => new Date(year, i, 1))
   const [dir, setDir] = useState(1)

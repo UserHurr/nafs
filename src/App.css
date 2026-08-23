@@ -114,6 +114,15 @@
   box-shadow: var(--shadow-glow);
 }
 
+.filter-segmented {
+  margin: 0 16px 4px;
+}
+
+.filter-segmented button {
+  padding: 7px 4px;
+  font-size: 12px;
+}
+
 .view-container {
   padding: 8px 16px 16px;
   position: relative;
@@ -407,10 +416,13 @@
 }
 
 .task-check {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--accent);
+  /* Visual circle stays 26px, but the tap target is enlarged to 44px (a11y
+     minimum) via a negative margin, so it doesn't disturb row spacing. */
+  width: 44px;
+  height: 44px;
+  margin: -9px;
+  position: relative;
+  border: none;
   background: none;
   color: var(--accent);
   font-size: 13px;
@@ -418,12 +430,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, color 0.15s;
+}
+
+.task-check::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  transform: translate(-50%, -50%);
+  transition: background 0.15s, border-color 0.15s;
 }
 
 .task-row.task-done .task-check {
-  background: linear-gradient(160deg, var(--accent), var(--accent-2));
   color: white;
+}
+
+.task-row.task-done .task-check::before {
+  background: linear-gradient(160deg, var(--accent), var(--accent-2));
   border-color: transparent;
 }
 
@@ -713,10 +740,50 @@
   color: var(--text-dim);
 }
 
+.color-swatch-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.color-swatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.color-swatch-active {
+  border-color: var(--text);
+  box-shadow: 0 0 0 2px var(--bg-card);
+}
+
 .emoji-btn-active {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 18%, var(--bg-elevated));
   color: var(--accent);
+}
+
+.time-duration-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.time-duration-field {
+  min-width: 0;
+}
+
+.time-duration-field .text-input {
+  min-width: 0;
+}
+
+@media (max-width: 340px) {
+  .time-duration-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .row-gap {
@@ -1180,6 +1247,115 @@
   opacity: 0.85;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+}
+
+/* Onboarding */
+.onboarding-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 14px 0 4px;
+}
+
+.onboarding-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.onboarding-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.onboarding-item-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.onboarding-item-text {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Toast */
+@keyframes toast-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-shrink {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.toast {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(84px + env(safe-area-inset-bottom));
+  max-width: calc(var(--app-max-width) - 32px);
+  margin: 0 auto;
+  background: var(--text);
+  color: var(--bg);
+  border-radius: 14px;
+  padding: 13px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-md);
+  z-index: 70;
+  overflow: hidden;
+  animation: toast-in 0.25s ease-out;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  transform-origin: left;
+  animation: toast-shrink 5s linear forwards;
+}
+
+.toast-message {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.toast-undo {
+  background: none;
+  border: none;
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
 }
 
 /* Confetti */

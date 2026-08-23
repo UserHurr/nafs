@@ -40,6 +40,7 @@ interface AppState {
   notifiedReminders: Record<string, boolean>
 
   addCategory: (c: Omit<Category, 'id'>) => void
+  updateCategory: (id: string, patch: Partial<Omit<Category, 'id'>>) => void
   removeCategory: (id: string) => void
 
   addMember: (m: Omit<Member, 'id'> & { id: string }) => void
@@ -81,6 +82,8 @@ export const useStore = create<AppState>()(
 
       addCategory: (c) =>
         set((s) => ({ categories: [...s.categories, { ...c, id: uid() }] })),
+      updateCategory: (id, patch) =>
+        set((s) => ({ categories: s.categories.map((c) => (c.id === id ? { ...c, ...patch } : c)) })),
       removeCategory: (id) =>
         set((s) => ({ categories: s.categories.filter((c) => c.id !== id) })),
 

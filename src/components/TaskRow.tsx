@@ -5,6 +5,7 @@ import { useConfettiBurst } from './Confetti'
 import { myMemberId } from '../syncStore'
 import { isShared, taskCompletionKey } from '../lib/members'
 import { Icon } from '../lib/icons'
+import { vibrateDone } from '../lib/haptics'
 
 export function TaskRow({
   task,
@@ -32,6 +33,7 @@ export function TaskRow({
     if (!done) {
       const rect = e.currentTarget.getBoundingClientRect()
       fire(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      vibrateDone()
     }
     toggleTaskDone(task.id, dateIso)
   }

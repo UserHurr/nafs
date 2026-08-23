@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
 import {
@@ -48,11 +49,11 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
     <div className="view-container" {...swipe}>
       <div className="month-nav">
         <button className="nav-arrow" onClick={() => goToMonth(addMonths(anchor, -1), -1)}>
-          ‹
+          <ChevronLeft size={18} />
         </button>
         <div className="month-label">{monthLabel(anchor)}</div>
         <button className="nav-arrow" onClick={() => goToMonth(addMonths(anchor, 1), 1)}>
-          ›
+          <ChevronRight size={18} />
         </button>
       </div>
 
@@ -69,9 +70,9 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
         {days.map((d) => {
           const iso = toIso(d)
           const dTasks = tasksOnDate(myTasks, iso)
-          const emojis = Array.from(
-            new Set(dTasks.map((t) => categories.find((c) => c.id === t.categoryId)?.emoji ?? '•')),
-          ).slice(0, 3)
+          const dotColors = Array.from(
+            new Set(dTasks.map((t) => categories.find((c) => c.id === t.categoryId)?.color).filter(Boolean)),
+          ).slice(0, 3) as string[]
           return (
             <button
               key={iso}
@@ -79,7 +80,11 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
               onClick={() => setSelected(d)}
             >
               <span className="month-cell-num">{dayNumber(d)}</span>
-              <span className="month-cell-emojis">{emojis.join('')}</span>
+              <span className="month-cell-dots">
+                {dotColors.map((c, i) => (
+                  <span key={i} className="month-cell-dot" style={{ background: c }} />
+                ))}
+              </span>
             </button>
           )
         })}
@@ -87,7 +92,7 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
 
       <div className="day-header">{fullDayLabel(selected)}</div>
       <div className="task-list">
-        {dayTasks.length === 0 && <div className="empty-state">Rien de prévu — profite ✨</div>}
+        {dayTasks.length === 0 && <div className="empty-state">Rien de prévu</div>}
         {dayTasks.map((t) => (
           <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
         ))}

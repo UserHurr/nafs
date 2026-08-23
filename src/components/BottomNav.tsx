@@ -1,10 +1,12 @@
+import { CalendarDays, ListChecks, SunMoon, BarChart3, type LucideIcon } from 'lucide-react'
+
 export type Tab = 'agenda' | 'todo' | 'routines' | 'stats'
 
-const tabs: { id: Tab; label: string; emoji: string }[] = [
-  { id: 'agenda', label: 'Agenda', emoji: '🗓️' },
-  { id: 'todo', label: 'To-Do', emoji: '✅' },
-  { id: 'routines', label: 'Routines', emoji: '🌗' },
-  { id: 'stats', label: 'Stats', emoji: '📊' },
+const tabs: { id: Tab; label: string; icon: LucideIcon }[] = [
+  { id: 'agenda', label: 'Agenda', icon: CalendarDays },
+  { id: 'todo', label: 'To-Do', icon: ListChecks },
+  { id: 'routines', label: 'Routines', icon: SunMoon },
+  { id: 'stats', label: 'Stats', icon: BarChart3 },
 ]
 
 export function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
@@ -16,7 +18,7 @@ export function BottomNav({ active, onChange }: { active: Tab; onChange: (t: Tab
           className={`bottom-nav-btn ${active === t.id ? 'active' : ''}`}
           onClick={() => onChange(t.id)}
         >
-          <span className="bottom-nav-emoji">{t.emoji}</span>
+          <t.icon className="bottom-nav-icon" size={22} strokeWidth={2} />
           <span>{t.label}</span>
         </button>
       ))}

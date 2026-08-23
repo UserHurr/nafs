@@ -11,7 +11,7 @@ export interface Recurrence {
 export interface Category {
   id: string
   name: string
-  emoji: string
+  icon: string
   color: string
 }
 
@@ -20,7 +20,7 @@ export const SHARED_OWNER = 'shared'
 export interface Member {
   id: string
   name: string
-  emoji: string
+  icon: string
   color: string
 }
 
@@ -65,6 +65,6 @@ export type RoutineType = 'morning' | 'evening'
 export interface RoutineItem {
   id: string
   title: string
-  emoji: string
+  icon: string
   ownerId: string
 }

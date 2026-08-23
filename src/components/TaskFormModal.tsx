@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { Bell, Clock, Pin, Repeat, Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import type { Recurrence, RecurrenceFreq, Task, TimeType } from '../types'
 import { toIso } from '../lib/dates'
 import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
 import { OwnerPicker } from './OwnerPicker'
+import { Icon, categoryIconChoices } from '../lib/icons'
 
 const weekdayLabels = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 
@@ -14,8 +16,6 @@ const freqLabels: Record<RecurrenceFreq, string> = {
   monthly: 'mois',
   yearly: 'an(s)',
 }
-
-const emojiChoices = ['💼', '💪', '📚', '🩺', '🎉', '🏠', '🍽️', '✨', '🎯', '🧘', '🚗', '💰', '🎨', '🐶', '🛒', '🎮']
 
 export function TaskFormModal({
   editingTask,
@@ -53,7 +53,7 @@ export function TaskFormModal({
 
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [newCatName, setNewCatName] = useState('')
-  const [newCatEmoji, setNewCatEmoji] = useState('✨')
+  const [newCatIcon, setNewCatIcon] = useState('sparkles')
 
   const toggleDay = (d: number) => {
     setDaysOfWeek((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()))
@@ -96,7 +96,7 @@ export function TaskFormModal({
     if (!newCatName.trim()) return
     const colorPalette = ['#6366f1', '#f97316', '#3b82f6', '#22c55e', '#ec4899', '#a855f7', '#eab308', '#14b8a6']
     const color = colorPalette[categories.length % colorPalette.length]
-    addCategory({ name: newCatName.trim(), emoji: newCatEmoji, color })
+    addCategory({ name: newCatName.trim(), icon: newCatIcon, color })
     setNewCatName('')
     setShowNewCategory(false)
   }
@@ -127,7 +127,7 @@ export function TaskFormModal({
               style={categoryId === c.id ? { background: c.color, borderColor: c.color } : undefined}
               onClick={() => setCategoryId(c.id)}
             >
-              <span>{c.emoji}</span> {c.name}
+              <Icon name={c.icon} size={14} /> {c.name}
             </button>
           ))}
           <button className="chip chip-dashed" onClick={() => setShowNewCategory((v) => !v)}>
@@ -138,13 +138,13 @@ export function TaskFormModal({
         {showNewCategory && (
           <div className="new-category-box">
             <div className="emoji-grid">
-              {emojiChoices.map((e) => (
+              {categoryIconChoices.map((key) => (
                 <button
-                  key={e}
-                  className={`emoji-btn ${newCatEmoji === e ? 'emoji-btn-active' : ''}`}
-                  onClick={() => setNewCatEmoji(e)}
+                  key={key}
+                  className={`emoji-btn ${newCatIcon === key ? 'emoji-btn-active' : ''}`}
+                  onClick={() => setNewCatIcon(key)}
                 >
-                  {e}
+                  <Icon name={key} size={16} />
                 </button>
               ))}
             </div>
@@ -165,10 +165,10 @@ export function TaskFormModal({
         <label className="field-label">Quand</label>
         <div className="segmented">
           <button className={timeType === 'allday' ? 'active' : ''} onClick={() => setTimeType('allday')}>
-            📌 Dans la journée
+            <Pin size={14} /> Dans la journée
           </button>
           <button className={timeType === 'timed' ? 'active' : ''} onClick={() => setTimeType('timed')}>
-            ⏰ À une heure précise
+            <Clock size={14} /> À une heure précise
           </button>
         </div>
 
@@ -199,7 +199,9 @@ export function TaskFormModal({
 
         {timeType === 'timed' && (
           <label className="field-label toggle-row">
-            <span>🔔 Me le rappeler</span>
+            <span className="row-gap">
+              <Bell size={15} /> Me le rappeler
+            </span>
             <input
               type="checkbox"
               checked={reminder}
@@ -221,7 +223,9 @@ export function TaskFormModal({
         <input className="text-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
 
         <label className="field-label toggle-row">
-          <span>🔁 Se répète</span>
+          <span className="row-gap">
+            <Repeat size={15} /> Se répète
+          </span>
           <input type="checkbox" checked={repeats} onChange={(e) => setRepeats(e.target.checked)} />
         </label>
 
@@ -287,7 +291,7 @@ export function TaskFormModal({
                 onClose()
               }}
             >
-              🗑️ Supprimer
+              <Trash2 size={15} /> Supprimer
             </button>
           )}
           <button className="btn-ghost" onClick={onClose}>

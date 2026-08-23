@@ -1,10 +1,10 @@
 import { useState } from 'react'
+import { Check, Sparkles } from 'lucide-react'
 import { useSyncStore, myMemberId } from '../syncStore'
 import { useStore } from '../store'
 import { supabaseConfigured } from '../lib/supabase'
 import { generateSyncCode } from '../lib/sync'
-
-const avatarChoices = ['🙂', '😄', '🥰', '😎', '🤓', '🧑', '👩', '👨', '🐱', '🐶', '🦊', '🌟', '🍀', '🔥', '🌸', '🦄']
+import { Icon, avatarIconChoices } from '../lib/icons'
 
 function ProfileCard() {
   const me = myMemberId()
@@ -15,10 +15,10 @@ function ProfileCard() {
 
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(myMember?.name ?? 'Moi')
-  const [emoji, setEmoji] = useState(myMember?.emoji ?? '🙂')
+  const [icon, setIcon] = useState(myMember?.icon ?? 'user')
 
   const save = () => {
-    updateMember(me, { name: name.trim() || 'Moi', emoji })
+    updateMember(me, { name: name.trim() || 'Moi', icon })
     setEditing(false)
   }
 
@@ -28,13 +28,13 @@ function ProfileCard() {
       {editing ? (
         <>
           <div className="emoji-grid">
-            {avatarChoices.map((e) => (
+            {avatarIconChoices.map((key) => (
               <button
-                key={e}
-                className={`emoji-btn ${emoji === e ? 'emoji-btn-active' : ''}`}
-                onClick={() => setEmoji(e)}
+                key={key}
+                className={`emoji-btn ${icon === key ? 'emoji-btn-active' : ''}`}
+                onClick={() => setIcon(key)}
               >
-                {e}
+                <Icon name={key} size={16} />
               </button>
             ))}
           </div>
@@ -47,7 +47,7 @@ function ProfileCard() {
         </>
       ) : (
         <div className="row-gap">
-          <span style={{ fontSize: 22 }}>{myMember?.emoji}</span>
+          <Icon name={myMember?.icon} size={22} />
           <span style={{ flex: 1, fontWeight: 700 }}>{myMember?.name}</span>
           <button className="btn-ghost" onClick={() => setEditing(true)}>
             Modifier
@@ -55,8 +55,13 @@ function ProfileCard() {
         </div>
       )}
       {others.length > 0 && (
-        <div className="stats-sub" style={{ marginTop: 10 }}>
-          Avec : {others.map((m) => `${m.emoji} ${m.name}`).join(', ')}
+        <div className="stats-sub row-gap" style={{ marginTop: 10 }}>
+          <span>Avec :</span>
+          {others.map((m) => (
+            <span key={m.id} className="row-gap" style={{ gap: 4 }}>
+              <Icon name={m.icon} size={14} /> {m.name}
+            </span>
+          ))}
         </div>
       )}
     </div>
@@ -88,10 +93,11 @@ export function SyncSection() {
 
       {code ? (
         <div className="stats-card" style={{ marginTop: 10 }}>
-          <div className="stats-sub">
-            {status === 'connected' && '🟢 Connecté'}
-            {status === 'connecting' && '🟡 Connexion…'}
-            {status === 'error' && `🔴 Erreur : ${error}`}
+          <div className="stats-sub row-gap">
+            <span className={`status-dot status-dot-${status}`} />
+            {status === 'connected' && 'Connecté'}
+            {status === 'connecting' && 'Connexion…'}
+            {status === 'error' && `Erreur : ${error}`}
           </div>
           <div className="sync-code-box">
             <code>{code}</code>
@@ -103,7 +109,13 @@ export function SyncSection() {
                 setTimeout(() => setCopied(false), 1500)
               }}
             >
-              {copied ? '✓ Copié' : 'Copier'}
+              {copied ? (
+                <>
+                  <Check size={14} /> Copié
+                </>
+              ) : (
+                'Copier'
+              )}
             </button>
           </div>
           <div className="stats-sub" style={{ marginTop: 6 }}>
@@ -150,7 +162,7 @@ export function SyncSection() {
               setCode(generateSyncCode())
             }}
           >
-            ✨ Générer un nouveau code
+            <Sparkles size={15} /> Générer un nouveau code
           </button>
         </div>
       )}

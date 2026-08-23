@@ -1,6 +1,8 @@
+import { Users } from 'lucide-react'
 import { useStore } from '../store'
 import { myMemberId } from '../syncStore'
 import { SHARED_OWNER } from '../types'
+import { Icon } from '../lib/icons'
 
 export function OwnerPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const members = useStore((s) => s.members)
@@ -19,7 +21,7 @@ export function OwnerPicker({ value, onChange }: { value: string; onChange: (id:
           style={value === me ? { background: myMember?.color ?? 'var(--accent)', borderColor: 'transparent' } : undefined}
           onClick={() => onChange(me)}
         >
-          {myMember?.emoji ?? '🙂'} Moi
+          <Icon name={myMember?.icon} size={14} /> Moi
         </button>
         {members
           .filter((m) => m.id !== me)
@@ -30,7 +32,7 @@ export function OwnerPicker({ value, onChange }: { value: string; onChange: (id:
               style={value === m.id ? { background: m.color, borderColor: 'transparent' } : undefined}
               onClick={() => onChange(m.id)}
             >
-              {m.emoji} {m.name}
+              <Icon name={m.icon} size={14} /> {m.name}
             </button>
           ))}
         <button
@@ -42,7 +44,7 @@ export function OwnerPicker({ value, onChange }: { value: string; onChange: (id:
           }
           onClick={() => onChange(SHARED_OWNER)}
         >
-          🤝 Nous
+          <Users size={14} /> Nous
         </button>
       </div>
     </>

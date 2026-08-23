@@ -1,8 +1,10 @@
+import { Bell, Check, Repeat } from 'lucide-react'
 import type { Task } from '../types'
 import { useStore } from '../store'
 import { useConfettiBurst } from './Confetti'
 import { myMemberId } from '../syncStore'
 import { isShared, taskCompletionKey } from '../lib/members'
+import { Icon } from '../lib/icons'
 
 export function TaskRow({
   task,
@@ -38,18 +40,18 @@ export function TaskRow({
     <div className={`task-row ${done ? 'task-done' : ''}`}>
       {node}
       <button className="task-check" style={{ borderColor: category?.color }} onClick={handleToggle}>
-        {done ? '✔' : ''}
+        {done && <Check size={14} strokeWidth={3} />}
       </button>
       <button className="task-body" onClick={onEdit}>
-        <span className="task-emoji">{category?.emoji ?? '•'}</span>
+        <Icon name={category?.icon} className="task-emoji" style={{ color: category?.color }} />
         <span className="task-title">{task.title}</span>
         {task.timeType === 'timed' && task.startTime && <span className="task-time">{task.startTime}</span>}
-        {task.recurrence && <span className="task-recurring">🔁</span>}
-        {task.reminder && <span className="task-recurring">🔔</span>}
+        {task.recurrence && <Repeat size={13} className="task-recurring" />}
+        {task.reminder && <Bell size={13} className="task-recurring" />}
       </button>
       {partner && (
         <span className={`partner-badge ${partnerDone ? 'partner-badge-done' : ''}`} title={partner.name}>
-          {partner.emoji}
+          <Icon name={partner.icon} size={14} />
         </span>
       )}
     </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { addDays, fullDayLabel, toIso } from '../lib/dates'
 import { DayTimeline } from './DayTimeline'
 import { TaskFormModal } from './TaskFormModal'
@@ -26,13 +27,13 @@ export function DayView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChan
     <div className="view-container" {...swipe}>
       <div className="month-nav">
         <button className="nav-arrow" onClick={() => goToDay(addDays(anchor, -1), -1)}>
-          ‹
+          <ChevronLeft size={18} />
         </button>
         <div className="day-header" style={{ margin: 0 }}>
           {fullDayLabel(anchor)}
         </div>
         <button className="nav-arrow" onClick={() => goToDay(addDays(anchor, 1), 1)}>
-          ›
+          <ChevronRight size={18} />
         </button>
       </div>
 

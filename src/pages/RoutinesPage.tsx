@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Check, Flame, Moon, Sunrise, SunMoon, Trash2, type LucideIcon } from 'lucide-react'
 import { useStore } from '../store'
 import { todayIso } from '../lib/dates'
 import { routineStreak } from '../lib/stats'
@@ -6,11 +7,18 @@ import { useConfettiBurst } from '../components/Confetti'
 import { OwnerPicker } from '../components/OwnerPicker'
 import { myMemberId } from '../syncStore'
 import { isShared, routineCompletionKey, visibleRoutineItems } from '../lib/members'
+import { Icon, routineIconChoices } from '../lib/icons'
 import type { RoutineType } from '../types'
 
-const emojiChoices = ['💧', '🧘', '🍳', '🧹', '📖', '🗒️', '🪥', '🚿', '🧴', '🏃', '🧠', '☕', '📵', '🕯️', '🌤️']
-
-function RoutineSection({ type, title, icon }: { type: RoutineType; title: string; icon: string }) {
+function RoutineSection({
+  type,
+  title,
+  headerIcon: HeaderIcon,
+}: {
+  type: RoutineType
+  title: string
+  headerIcon: LucideIcon
+}) {
   const allItems = useStore((s) => s.routines[type])
   const members = useStore((s) => s.members)
   const toggleRoutineItem = useStore((s) => s.toggleRoutineItem)
@@ -25,7 +33,7 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
 
   const [adding, setAdding] = useState(false)
   const [newTitle, setNewTitle] = useState('')
-  const [newEmoji, setNewEmoji] = useState(emojiChoices[0])
+  const [newIcon, setNewIcon] = useState(routineIconChoices[0])
   const [newOwnerId, setNewOwnerId] = useState(me)
 
   const doneCount = items.filter((i) => routineCompletions[routineCompletionKey(type, i.id, iso, me)]).length
@@ -43,11 +51,15 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
     <div className="routine-section">
       {node}
       <div className="routine-header">
-        <span>
-          {icon} {title}
+        <span className="row-gap">
+          <HeaderIcon size={16} /> {title}
         </span>
         <span className="row-gap">
-          {streak > 0 && <span className="streak-badge">🔥 {streak}j</span>}
+          {streak > 0 && (
+            <span className="streak-badge row-gap">
+              <Flame size={12} /> {streak}j
+            </span>
+          )}
           <span className="routine-progress">
             {doneCount}/{items.length}
           </span>
@@ -65,19 +77,19 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
           return (
             <div key={item.id} className={`task-row ${done ? 'task-done' : ''}`}>
               <button className="task-check" onClick={(e) => handleToggle(e, item.id, done)}>
-                {done ? '✔' : ''}
+                {done && <Check size={12} strokeWidth={3} />}
               </button>
               <button className="task-body" onClick={(e) => handleToggle(e, item.id, done)}>
-                <span className="task-emoji">{item.emoji}</span>
+                <Icon name={item.icon} className="task-emoji" />
                 <span className="task-title">{item.title}</span>
               </button>
               {partner && (
                 <span className={`partner-badge ${partnerDone ? 'partner-badge-done' : ''}`} title={partner.name}>
-                  {partner.emoji}
+                  <Icon name={partner.icon} size={14} />
                 </span>
               )}
               <button className="task-delete" onClick={() => removeRoutineItem(type, item.id)}>
-                🗑️
+                <Trash2 size={15} />
               </button>
             </div>
           )
@@ -87,13 +99,13 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
       {adding ? (
         <div className="new-category-box">
           <div className="emoji-grid">
-            {emojiChoices.map((e) => (
+            {routineIconChoices.map((key) => (
               <button
-                key={e}
-                className={`emoji-btn ${newEmoji === e ? 'emoji-btn-active' : ''}`}
-                onClick={() => setNewEmoji(e)}
+                key={key}
+                className={`emoji-btn ${newIcon === key ? 'emoji-btn-active' : ''}`}
+                onClick={() => setNewIcon(key)}
               >
-                {e}
+                <Icon name={key} size={16} />
               </button>
             ))}
           </div>
@@ -109,7 +121,7 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
               className="btn-small"
               onClick={() => {
                 if (!newTitle.trim()) return
-                addRoutineItem(type, newTitle.trim(), newEmoji, newOwnerId)
+                addRoutineItem(type, newTitle.trim(), newIcon, newOwnerId)
                 setNewTitle('')
                 setAdding(false)
               }}
@@ -130,9 +142,11 @@ function RoutineSection({ type, title, icon }: { type: RoutineType; title: strin
 export function RoutinesPage() {
   return (
     <div className="page">
-      <h1 className="page-title">🌗 Routines</h1>
-      <RoutineSection type="morning" title="Routine du matin" icon="🌅" />
-      <RoutineSection type="evening" title="Routine du soir" icon="🌙" />
+      <h1 className="page-title row-gap">
+        <SunMoon size={24} strokeWidth={2.2} /> Routines
+      </h1>
+      <RoutineSection type="morning" title="Routine du matin" headerIcon={Sunrise} />
+      <RoutineSection type="evening" title="Routine du soir" headerIcon={Moon} />
     </div>
   )
 }

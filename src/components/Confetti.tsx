@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const particles = ['✨', '🎉', '💖', '⭐', '🌸']
+const colors = ['var(--accent)', 'var(--accent-2)', '#d4a94c']
 
 export function useConfettiBurst() {
   const [bursts, setBursts] = useState<{ id: string; x: number; y: number }[]>([])
@@ -26,10 +26,11 @@ export function useConfettiBurst() {
 
 function ConfettiBurst({ x, y }: { x: number; y: number }) {
   const [pieces] = useState(() =>
-    Array.from({ length: 7 }, (_, i) => ({
-      emoji: particles[i % particles.length],
-      angle: (i / 7) * Math.PI * 2 + Math.random() * 0.5,
-      distance: 34 + Math.random() * 22,
+    Array.from({ length: 8 }, (_, i) => ({
+      color: colors[i % colors.length],
+      size: 5 + Math.random() * 3,
+      angle: (i / 8) * Math.PI * 2 + Math.random() * 0.5,
+      distance: 30 + Math.random() * 20,
       rotate: Math.random() * 60 - 30,
     })),
   )
@@ -45,11 +46,12 @@ function ConfettiBurst({ x, y }: { x: number; y: number }) {
               '--dx': `${Math.cos(p.angle) * p.distance}px`,
               '--dy': `${Math.sin(p.angle) * p.distance}px`,
               '--rot': `${p.rotate}deg`,
+              width: p.size,
+              height: p.size,
+              background: p.color,
             } as React.CSSProperties
           }
-        >
-          {p.emoji}
-        </span>
+        />
       ))}
     </div>
   )

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
 import { addDays, addWeeks, dayNumber, fullDayLabel, isSameDay, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
@@ -35,7 +36,7 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
     <div className="view-container" {...swipe}>
       <div className="week-nav">
         <button className="nav-arrow" onClick={() => onAnchorChange(addWeeks(anchor, -1))}>
-          ‹
+          <ChevronLeft size={18} />
         </button>
         <div className="week-strip">
           {days.map((d) => (
@@ -50,7 +51,7 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
           ))}
         </div>
         <button className="nav-arrow" onClick={() => onAnchorChange(addWeeks(anchor, 1))}>
-          ›
+          <ChevronRight size={18} />
         </button>
       </div>
 
@@ -58,7 +59,7 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
         <div className="day-header">{fullDayLabel(selected)}</div>
 
         <div className="task-list">
-          {dayTasks.length === 0 && <div className="empty-state">Rien de prévu — profite ✨</div>}
+          {dayTasks.length === 0 && <div className="empty-state">Rien de prévu</div>}
           {dayTasks.map((t) => (
             <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
           ))}

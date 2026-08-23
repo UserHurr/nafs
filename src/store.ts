@@ -6,26 +6,26 @@ import { myMemberId } from './syncStore'
 const uid = () => crypto.randomUUID()
 
 const defaultCategories: Category[] = [
-  { id: 'travail', name: 'Travail', emoji: '💼', color: '#6366f1' },
-  { id: 'sport', name: 'Sport', emoji: '💪', color: '#f97316' },
-  { id: 'etude', name: 'Étude', emoji: '📚', color: '#3b82f6' },
-  { id: 'sante', name: 'Santé', emoji: '🩺', color: '#22c55e' },
-  { id: 'social', name: 'Social', emoji: '🎉', color: '#ec4899' },
-  { id: 'maison', name: 'Maison', emoji: '🏠', color: '#a855f7' },
-  { id: 'repas', name: 'Repas', emoji: '🍽️', color: '#eab308' },
-  { id: 'perso', name: 'Perso', emoji: '✨', color: '#14b8a6' },
+  { id: 'travail', name: 'Travail', icon: 'briefcase', color: '#6366f1' },
+  { id: 'sport', name: 'Sport', icon: 'dumbbell', color: '#f97316' },
+  { id: 'etude', name: 'Étude', icon: 'book', color: '#3b82f6' },
+  { id: 'sante', name: 'Santé', icon: 'heart-pulse', color: '#22c55e' },
+  { id: 'social', name: 'Social', icon: 'users', color: '#ec4899' },
+  { id: 'maison', name: 'Maison', icon: 'home', color: '#a855f7' },
+  { id: 'repas', name: 'Repas', icon: 'utensils', color: '#eab308' },
+  { id: 'perso', name: 'Perso', icon: 'sparkles', color: '#14b8a6' },
 ]
 
 const defaultMorningRoutine = (ownerId: string): RoutineItem[] => [
-  { id: uid(), title: 'Boire un verre d’eau', emoji: '💧', ownerId },
-  { id: uid(), title: 'Étirements', emoji: '🧘', ownerId },
-  { id: uid(), title: 'Petit-déjeuner', emoji: '🍳', ownerId },
+  { id: uid(), title: 'Boire un verre d’eau', icon: 'glass-water', ownerId },
+  { id: uid(), title: 'Étirements', icon: 'stretch', ownerId },
+  { id: uid(), title: 'Petit-déjeuner', icon: 'coffee', ownerId },
 ]
 
 const defaultEveningRoutine = (ownerId: string): RoutineItem[] => [
-  { id: uid(), title: 'Ranger la journée', emoji: '🧹', ownerId },
-  { id: uid(), title: 'Lecture', emoji: '📖', ownerId },
-  { id: uid(), title: 'Préparer demain', emoji: '🗒️', ownerId },
+  { id: uid(), title: 'Ranger la journée', icon: 'home', ownerId },
+  { id: uid(), title: 'Lecture', icon: 'book-text', ownerId },
+  { id: uid(), title: 'Préparer demain', icon: 'notebook-pen', ownerId },
 ]
 
 interface AppState {
@@ -58,7 +58,7 @@ interface AppState {
   toggleSubtask: (todoId: string, subtaskId: string) => void
   removeSubtask: (todoId: string, subtaskId: string) => void
 
-  addRoutineItem: (type: RoutineType, title: string, emoji: string, ownerId: string) => void
+  addRoutineItem: (type: RoutineType, title: string, icon: string, ownerId: string) => void
   removeRoutineItem: (type: RoutineType, id: string) => void
   toggleRoutineItem: (type: RoutineType, itemId: string, dateIso: string) => void
 
@@ -70,7 +70,7 @@ export const useStore = create<AppState>()(
   persist(
     (set) => ({
       categories: defaultCategories,
-      members: [{ id: myMemberId(), name: 'Moi', emoji: '🙂', color: '#ec4899' }],
+      members: [{ id: myMemberId(), name: 'Moi', icon: 'user', color: '#ec4899' }],
       tasks: [],
       todos: [],
       routines: { morning: defaultMorningRoutine(myMemberId()), evening: defaultEveningRoutine(myMemberId()) },
@@ -155,9 +155,9 @@ export const useStore = create<AppState>()(
           ),
         })),
 
-      addRoutineItem: (type, title, emoji, ownerId) =>
+      addRoutineItem: (type, title, icon, ownerId) =>
         set((s) => ({
-          routines: { ...s.routines, [type]: [...s.routines[type], { id: uid(), title, emoji, ownerId }] },
+          routines: { ...s.routines, [type]: [...s.routines[type], { id: uid(), title, icon, ownerId }] },
         })),
       removeRoutineItem: (type, id) =>
         set((s) => ({
@@ -173,6 +173,6 @@ export const useStore = create<AppState>()(
       markReminderNotified: (taskId, dateIso) =>
         set((s) => ({ notifiedReminders: { ...s.notifiedReminders, [`${taskId}_${dateIso}`]: true } })),
     }),
-    { name: 'nafs-store-v2' },
+    { name: 'nafs-store-v3' },
   ),
 )

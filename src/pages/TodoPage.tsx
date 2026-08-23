@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { AlertTriangle, Calendar, Check, ListChecks, Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import { todayIso } from '../lib/dates'
 import { useConfettiBurst } from '../components/Confetti'
 import { OwnerPicker } from '../components/OwnerPicker'
 import { myMemberId } from '../syncStore'
 import { isShared, visibleTodos } from '../lib/members'
+import { Icon } from '../lib/icons'
 import type { Priority, Todo } from '../types'
 
 const priorityMeta: Record<Priority, { label: string; color: string }> = {
@@ -49,7 +51,7 @@ function TodoRow({ todo }: { todo: Todo }) {
     <div className={`task-row todo-row ${done ? 'task-done' : ''}`} style={{ flexWrap: 'wrap' }}>
       {node}
       <button className="task-check" onClick={handleToggle}>
-        {done ? '✔' : ''}
+        {done && <Check size={14} strokeWidth={3} />}
       </button>
       <button className="task-body" onClick={() => setExpanded((v) => !v)}>
         {todo.priority && (
@@ -63,18 +65,18 @@ function TodoRow({ todo }: { todo: Todo }) {
         )}
         {todo.dueDate && (
           <span className={`due-badge ${overdue ? 'due-badge-overdue' : ''}`}>
-            {overdue ? '⚠️ ' : '📅 '}
+            {overdue ? <AlertTriangle size={11} /> : <Calendar size={11} />}
             {todo.dueDate.slice(5)}
           </span>
         )}
       </button>
       {partner && (
         <span className={`partner-badge ${partnerDone ? 'partner-badge-done' : ''}`} title={partner.name}>
-          {partner.emoji}
+          <Icon name={partner.icon} size={14} />
         </span>
       )}
       <button className="task-delete" onClick={() => removeTodo(todo.id)}>
-        🗑️
+        <Trash2 size={15} />
       </button>
 
       {expanded && (
@@ -95,11 +97,11 @@ function TodoRow({ todo }: { todo: Todo }) {
           {subtasks.map((st) => (
             <div key={st.id} className="subtask-row">
               <button className="task-check task-check-sm" onClick={() => toggleSubtask(todo.id, st.id)}>
-                {st.done ? '✔' : ''}
+                {st.done && <Check size={10} strokeWidth={3} />}
               </button>
               <span className={st.done ? 'subtask-done' : ''}>{st.title}</span>
               <button className="task-delete" onClick={() => removeSubtask(todo.id, st.id)}>
-                🗑️
+                <Trash2 size={14} />
               </button>
             </div>
           ))}
@@ -155,7 +157,9 @@ export function TodoPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">✅ To-Do</h1>
+      <h1 className="page-title row-gap">
+        <ListChecks size={24} strokeWidth={2.2} /> To-Do
+      </h1>
 
       <div className="todo-add-row">
         <input
@@ -180,7 +184,7 @@ export function TodoPage() {
       <OwnerPicker value={ownerId} onChange={setOwnerId} />
 
       <div className="task-list" style={{ marginTop: 12 }}>
-        {pending.length === 0 && done.length === 0 && <div className="empty-state">Ta liste est vide 🎈</div>}
+        {pending.length === 0 && done.length === 0 && <div className="empty-state">Ta liste est vide</div>}
         {pending.map((t) => (
           <TodoRow key={t.id} todo={t} />
         ))}

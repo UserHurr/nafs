@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
 import { addYears, isToday, monthGrid, toIso } from '../lib/dates'
@@ -37,11 +38,11 @@ export function YearView({
     <div className="view-container" {...swipe}>
       <div className="month-nav">
         <button className="nav-arrow" onClick={() => goToYear(addYears(anchor, -1), -1)}>
-          ‹
+          <ChevronLeft size={18} />
         </button>
         <div className="month-label">{year}</div>
         <button className="nav-arrow" onClick={() => goToYear(addYears(anchor, 1), 1)}>
-          ›
+          <ChevronRight size={18} />
         </button>
       </div>
 

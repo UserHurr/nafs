@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { Check } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
 import { minutesToTime, timeToMinutes } from '../lib/dates'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
 import { taskCompletionKey, visibleTasks } from '../lib/members'
+import { Icon } from '../lib/icons'
 
 const ROW_HEIGHT = 56
 const PX_PER_MIN = ROW_HEIGHT / 60
@@ -90,7 +92,7 @@ export function DayTimeline({
                 style={{ background: category?.color }}
                 onClick={() => onEditTask(t)}
               >
-                {category?.emoji} {t.title}
+                <Icon name={category?.icon} size={13} /> {t.title}
               </button>
             )
           })}
@@ -135,10 +137,10 @@ export function DayTimeline({
                     toggleTaskDone(t.id, dateIso)
                   }}
                 >
-                  {done ? '✔' : ''}
+                  {done && <Check size={10} strokeWidth={3} />}
                 </button>
                 <span className="timeline-task-title">
-                  {category?.emoji} {t.title}
+                  <Icon name={category?.icon} size={12} /> {t.title}
                 </span>
                 <span className="timeline-task-time">{minutesToTime(displayMinutes)}</span>
               </div>

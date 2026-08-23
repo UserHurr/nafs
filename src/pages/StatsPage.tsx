@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { BarChart3, Bell, Flame, Moon, Sunrise, Users } from 'lucide-react'
 import { useStore } from '../store'
 import { dayCompletion, heatmapDays, routineStreak, sharedWeeklySummary, weeklySummary } from '../lib/stats'
 import { toIso, isToday } from '../lib/dates'
@@ -6,6 +7,7 @@ import { notificationsSupported, requestNotificationPermission } from '../lib/no
 import { SyncSection } from '../components/SyncSection'
 import { myMemberId } from '../syncStore'
 import { useThemeStore, type Theme } from '../themeStore'
+import { Icon } from '../lib/icons'
 
 const weekdayLabels = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -41,7 +43,9 @@ export function StatsPage() {
 
   return (
     <div className="page">
-      <h1 className="page-title">📊 Stats</h1>
+      <h1 className="page-title row-gap">
+        <BarChart3 size={24} strokeWidth={2.2} /> Stats
+      </h1>
 
       <div className="stats-card">
         <div className="stats-card-title">Cette semaine</div>
@@ -56,20 +60,36 @@ export function StatsPage() {
 
       <div className="row-gap" style={{ marginTop: 12 }}>
         <div className="stats-card" style={{ flex: 1 }}>
-          <div className="stats-card-title">🌅 Matin</div>
-          <div className="stats-big-number" style={{ fontSize: 22 }}>
-            {morningStreak > 0 ? `🔥 ${morningStreak}j` : '—'}
+          <div className="stats-card-title row-gap">
+            <Sunrise size={14} /> Matin
+          </div>
+          <div className="stats-big-number row-gap" style={{ fontSize: 22 }}>
+            {morningStreak > 0 ? (
+              <>
+                <Flame size={18} color="var(--accent)" /> {morningStreak}j
+              </>
+            ) : (
+              '—'
+            )}
           </div>
         </div>
         <div className="stats-card" style={{ flex: 1 }}>
-          <div className="stats-card-title">🌙 Soir</div>
-          <div className="stats-big-number" style={{ fontSize: 22 }}>
-            {eveningStreak > 0 ? `🔥 ${eveningStreak}j` : '—'}
+          <div className="stats-card-title row-gap">
+            <Moon size={14} /> Soir
+          </div>
+          <div className="stats-big-number row-gap" style={{ fontSize: 22 }}>
+            {eveningStreak > 0 ? (
+              <>
+                <Flame size={18} color="var(--accent)" /> {eveningStreak}j
+              </>
+            ) : (
+              '—'
+            )}
           </div>
         </div>
       </div>
 
-      {partner && <TogetherCard partnerId={partner.id} partnerName={partner.name} partnerEmoji={partner.emoji} />}
+      {partner && <TogetherCard partnerId={partner.id} partnerName={partner.name} partnerIcon={partner.icon} />}
 
       <div className="section-label">Historique ({weeks} semaines)</div>
       <div className="heatmap-wrap">
@@ -106,7 +126,9 @@ export function StatsPage() {
           <div className="stats-sub">Non supporté sur ce navigateur.</div>
         ) : notificationsEnabled ? (
           <>
-            <div className="stats-sub">🔔 Rappels activés — les tâches avec une cloche te préviendront.</div>
+            <div className="stats-sub row-gap">
+              <Bell size={14} /> Rappels activés — les tâches avec une cloche te préviendront.
+            </div>
             <button className="btn-ghost" style={{ marginTop: 10 }} onClick={() => setNotificationsEnabled(false)}>
               Désactiver
             </button>
@@ -114,11 +136,11 @@ export function StatsPage() {
         ) : (
           <>
             <div className="stats-sub">
-              Active les rappels pour être prévenu·e à l'heure d'une tâche (marquée 🔔). Ne fonctionne que quand
-              l'app est ouverte ou récemment utilisée.
+              Active les rappels pour être prévenu·e à l'heure d'une tâche (marquée d'une cloche). Ne fonctionne que
+              quand l'app est ouverte ou récemment utilisée.
             </div>
             <button className="btn-small" style={{ marginTop: 10 }} onClick={handleEnableNotifications} disabled={requesting}>
-              🔔 Activer les rappels
+              <Bell size={15} /> Activer les rappels
             </button>
           </>
         )}
@@ -165,11 +187,11 @@ function ThemePicker() {
 function TogetherCard({
   partnerId,
   partnerName,
-  partnerEmoji,
+  partnerIcon,
 }: {
   partnerId: string
   partnerName: string
-  partnerEmoji: string
+  partnerIcon: string
 }) {
   const tasks = useStore((s) => s.tasks)
   const taskCompletions = useStore((s) => s.taskCompletions)
@@ -183,7 +205,9 @@ function TogetherCard({
 
   return (
     <div className="stats-card" style={{ marginTop: 12 }}>
-      <div className="stats-card-title">🤝 Nos objectifs communs cette semaine</div>
+      <div className="stats-card-title row-gap">
+        <Users size={14} /> Nos objectifs communs cette semaine
+      </div>
       <div className="together-row">
         <div className="together-col">
           <div className="stats-sub">Toi</div>
@@ -195,8 +219,8 @@ function TogetherCard({
           </div>
         </div>
         <div className="together-col">
-          <div className="stats-sub">
-            {partnerEmoji} {partnerName}
+          <div className="stats-sub row-gap">
+            <Icon name={partnerIcon} size={13} /> {partnerName}
           </div>
           <div className="stats-big-number" style={{ fontSize: 24 }}>
             {Math.round(theirs.ratio * 100)}%

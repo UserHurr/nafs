@@ -14,7 +14,7 @@ export default defineConfig({
         short_name: 'Nafs',
         description: 'Agenda hebdomadaire, mensuel et annuel personnalisable, to-do list et routines matin/soir',
         theme_color: '#b8677a',
-        background_color: '#faf1f0',
+        background_color: '#fafafa',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',

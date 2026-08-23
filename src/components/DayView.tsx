@@ -3,27 +3,40 @@ import { addDays, fullDayLabel, toIso } from '../lib/dates'
 import { DayTimeline } from './DayTimeline'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
+import { useSwipeNav } from '../hooks/useSwipeNav'
 
 export function DayView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChange: (d: Date) => void }) {
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
+  const [dir, setDir] = useState(1)
   const dateIso = toIso(anchor)
 
+  const goToDay = (d: Date, direction: number) => {
+    setDir(direction)
+    onAnchorChange(d)
+  }
+
+  const swipe = useSwipeNav(
+    () => goToDay(addDays(anchor, -1), -1),
+    () => goToDay(addDays(anchor, 1), 1),
+    '.timeline-task',
+  )
+
   return (
-    <div className="view-container">
+    <div className="view-container" {...swipe}>
       <div className="month-nav">
-        <button className="nav-arrow" onClick={() => onAnchorChange(addDays(anchor, -1))}>
+        <button className="nav-arrow" onClick={() => goToDay(addDays(anchor, -1), -1)}>
           ‹
         </button>
         <div className="day-header" style={{ margin: 0 }}>
           {fullDayLabel(anchor)}
         </div>
-        <button className="nav-arrow" onClick={() => onAnchorChange(addDays(anchor, 1))}>
+        <button className="nav-arrow" onClick={() => goToDay(addDays(anchor, 1), 1)}>
           ›
         </button>
       </div>
 
-      <div style={{ marginTop: 14 }}>
+      <div key={dateIso} className="view-slide" style={{ marginTop: 14, '--dir': dir } as React.CSSProperties}>
         <DayTimeline dateIso={dateIso} onEditTask={setEditing} />
       </div>
 

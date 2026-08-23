@@ -17,6 +17,7 @@ import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
 import { visibleTasks } from '../lib/members'
+import { useSwipeNav } from '../hooks/useSwipeNav'
 
 const weekdayHeaders = ['L', 'M', 'M', 'J', 'V', 'S', 'D']
 
@@ -26,24 +27,36 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
   const [selected, setSelected] = useState(anchor)
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
+  const [dir, setDir] = useState(1)
 
   const myTasks = visibleTasks(tasks, myMemberId())
   const days = monthGrid(anchor)
   const selectedIso = toIso(selected)
   const dayTasks = tasksOnDate(myTasks, selectedIso)
 
+  const goToMonth = (d: Date, direction: number) => {
+    setDir(direction)
+    onAnchorChange(d)
+  }
+
+  const swipe = useSwipeNav(
+    () => goToMonth(addMonths(anchor, -1), -1),
+    () => goToMonth(addMonths(anchor, 1), 1),
+  )
+
   return (
-    <div className="view-container">
+    <div className="view-container" {...swipe}>
       <div className="month-nav">
-        <button className="nav-arrow" onClick={() => onAnchorChange(addMonths(anchor, -1))}>
+        <button className="nav-arrow" onClick={() => goToMonth(addMonths(anchor, -1), -1)}>
           ‹
         </button>
         <div className="month-label">{monthLabel(anchor)}</div>
-        <button className="nav-arrow" onClick={() => onAnchorChange(addMonths(anchor, 1))}>
+        <button className="nav-arrow" onClick={() => goToMonth(addMonths(anchor, 1), 1)}>
           ›
         </button>
       </div>
 
+      <div key={monthLabel(anchor)} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
       <div className="month-grid-headers">
         {weekdayHeaders.map((w, i) => (
           <div key={i} className="month-grid-header">
@@ -78,6 +91,7 @@ export function MonthView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCh
         {dayTasks.map((t) => (
           <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
         ))}
+      </div>
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>

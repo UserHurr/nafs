@@ -1,25 +1,38 @@
 import { useState } from 'react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
-import { addWeeks, dayNumber, fullDayLabel, isSameDay, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
+import { addDays, addWeeks, dayNumber, fullDayLabel, isSameDay, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
 import { TaskRow } from './TaskRow'
 import { TaskFormModal } from './TaskFormModal'
 import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
 import { visibleTasks } from '../lib/members'
+import { useSwipeNav } from '../hooks/useSwipeNav'
 
 export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorChange: (d: Date) => void }) {
   const tasks = useStore((s) => s.tasks)
   const [selected, setSelected] = useState(anchor)
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
+  const [dir, setDir] = useState(1)
 
   const days = weekDays(anchor)
   const selectedIso = toIso(selected)
   const dayTasks = tasksOnDate(visibleTasks(tasks, myMemberId()), selectedIso)
 
+  const goToDay = (d: Date, direction: number) => {
+    setDir(direction)
+    setSelected(d)
+    onAnchorChange(d)
+  }
+
+  const swipe = useSwipeNav(
+    () => goToDay(addDays(selected, -1), -1),
+    () => goToDay(addDays(selected, 1), 1),
+  )
+
   return (
-    <div className="view-container">
+    <div className="view-container" {...swipe}>
       <div className="week-nav">
         <button className="nav-arrow" onClick={() => onAnchorChange(addWeeks(anchor, -1))}>
           ‹
@@ -41,13 +54,15 @@ export function WeekView({ anchor, onAnchorChange }: { anchor: Date; onAnchorCha
         </button>
       </div>
 
-      <div className="day-header">{fullDayLabel(selected)}</div>
+      <div key={selectedIso} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
+        <div className="day-header">{fullDayLabel(selected)}</div>
 
-      <div className="task-list">
-        {dayTasks.length === 0 && <div className="empty-state">Rien de prévu — profite ✨</div>}
-        {dayTasks.map((t) => (
-          <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
-        ))}
+        <div className="task-list">
+          {dayTasks.length === 0 && <div className="empty-state">Rien de prévu — profite ✨</div>}
+          {dayTasks.map((t) => (
+            <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
+          ))}
+        </div>
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>

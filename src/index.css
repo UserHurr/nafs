@@ -1,0 +1,127 @@
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/Quicksand-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/Quicksand-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/Quicksand-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/Quicksand-700.woff2') format('woff2');
+}
+
+:root {
+  --app-max-width: 560px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --app-max-width: 900px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --app-max-width: 1080px;
+  }
+}
+
+:root,
+:root[data-theme='pink'] {
+  --bg: #fdf1f6;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --border: #f6d9e6;
+  --text: #3a2233;
+  --text-dim: #9c7c8f;
+  --accent: #ec4899;
+  --accent-2: #fb7185;
+  --accent-rgb: 236, 72, 153;
+  --accent-soft: #fce7f0;
+  --danger: #e11d48;
+  --radius: 18px;
+  --shadow-sm: 0 1px 2px rgba(190, 24, 93, 0.06), 0 1px 3px rgba(190, 24, 93, 0.08);
+  --shadow-md: 0 6px 20px rgba(219, 39, 119, 0.12);
+  --shadow-glow: 0 8px 22px rgba(236, 72, 153, 0.35);
+  color-scheme: light;
+}
+
+:root[data-theme='blue'] {
+  --bg: #eff6fd;
+  --bg-elevated: #ffffff;
+  --bg-card: #ffffff;
+  --border: #d9e8f9;
+  --text: #1e2a3f;
+  --text-dim: #7186a3;
+  --accent: #2f7cf6;
+  --accent-2: #22c1dc;
+  --accent-rgb: 47, 124, 246;
+  --accent-soft: #e2eefd;
+  --danger: #e11d48;
+  --radius: 18px;
+  --shadow-sm: 0 1px 2px rgba(30, 64, 175, 0.06), 0 1px 3px rgba(30, 64, 175, 0.08);
+  --shadow-md: 0 6px 20px rgba(37, 99, 235, 0.12);
+  --shadow-glow: 0 8px 22px rgba(47, 124, 246, 0.35);
+  color-scheme: light;
+}
+
+/* Dark mode intentionally disabled: the app always renders in its light
+   palette (pink/blue) regardless of the OS-level color scheme preference. */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior-y: none;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    'Quicksand', ui-rounded, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s ease;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.97);
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: var(--text);
+}
+
+#root {
+  height: 100%;
+}

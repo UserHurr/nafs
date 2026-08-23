@@ -196,45 +196,31 @@
   color: white;
 }
 
+.week-day-dots {
+  display: flex;
+  gap: 2px;
+  height: 5px;
+  align-items: center;
+}
+
+.week-day-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.week-day-active .week-day-dot {
+  background: white !important;
+  opacity: 0.85;
+}
+
 .day-header {
   margin: 20px 0 10px;
   font-size: 17px;
   font-weight: 800;
   text-transform: capitalize;
   letter-spacing: -0.01em;
-}
-
-.week-scroller {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  padding-bottom: 4px;
-  margin: 0 -16px;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-
-.week-day-card {
-  flex: 0 0 82%;
-  scroll-snap-align: start;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: var(--shadow-sm);
-}
-
-.week-day-card-active {
-  border-color: var(--accent);
-}
-
-.week-day-card-header {
-  font-size: 15px;
-  font-weight: 800;
-  text-transform: capitalize;
-  letter-spacing: -0.01em;
-  margin-bottom: 10px;
 }
 
 /* Month view */

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
@@ -20,16 +20,22 @@ export function WeekView({
   filter: OwnershipFilter
 }) {
   const tasks = useStore((s) => s.tasks)
+  const categories = useStore((s) => s.categories)
   const [selected, setSelected] = useState(anchor)
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [dir, setDir] = useState(1)
-  const scrollerRef = useRef<HTMLDivElement>(null)
-  const dayCardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const days = weekDays(anchor)
   const selectedIso = toIso(selected)
   const myTasks = visibleTasks(tasks, myMemberId(), filter)
+  const dayTasks = tasksOnDate(myTasks, selectedIso)
+
+  const goToDay = (d: Date, direction: number) => {
+    setDir(direction)
+    setSelected(d)
+    onAnchorChange(d)
+  }
 
   const goToWeek = (direction: number) => {
     setDir(direction)
@@ -37,15 +43,9 @@ export function WeekView({
     onAnchorChange(addWeeks(anchor, direction))
   }
 
-  const jumpToDay = (d: Date) => {
-    setSelected(d)
-    dayCardRefs.current[toIso(d)]?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
-  }
-
   const swipe = useSwipeNav(
     () => goToWeek(-1),
     () => goToWeek(1),
-    '.week-day-card',
   )
 
   return (
@@ -55,45 +55,45 @@ export function WeekView({
           <ChevronLeft size={18} />
         </button>
         <div className="week-strip">
-          {days.map((d) => (
-            <button
-              key={d.toISOString()}
-              className={`week-day ${isSameDay(d, selected) ? 'week-day-active' : ''} ${isToday(d) ? 'week-day-today' : ''}`}
-              onClick={() => jumpToDay(d)}
-            >
-              <span className="week-day-label">{weekdayShort(d)}</span>
-              <span className="week-day-num">{dayNumber(d)}</span>
-            </button>
-          ))}
+          {days.map((d) => {
+            const iso = toIso(d)
+            const dotColors = Array.from(
+              new Set(
+                tasksOnDate(myTasks, iso)
+                  .map((t) => categories.find((c) => c.id === t.categoryId)?.color)
+                  .filter(Boolean),
+              ),
+            ).slice(0, 3) as string[]
+            return (
+              <button
+                key={d.toISOString()}
+                className={`week-day ${isSameDay(d, selected) ? 'week-day-active' : ''} ${isToday(d) ? 'week-day-today' : ''}`}
+                onClick={() => goToDay(d, isSameDay(d, selected) ? 1 : d < selected ? -1 : 1)}
+              >
+                <span className="week-day-label">{weekdayShort(d)}</span>
+                <span className="week-day-num">{dayNumber(d)}</span>
+                <span className="week-day-dots">
+                  {dotColors.map((c, i) => (
+                    <span key={i} className="week-day-dot" style={{ background: c }} />
+                  ))}
+                </span>
+              </button>
+            )
+          })}
         </div>
         <button className="nav-arrow" onClick={() => goToWeek(1)}>
           <ChevronRight size={18} />
         </button>
       </div>
 
-      <div key={toIso(anchor)} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
-        <div className="week-scroller" ref={scrollerRef}>
-          {days.map((d) => {
-            const iso = toIso(d)
-            const dayTasks = tasksOnDate(myTasks, iso)
-            return (
-              <div
-                key={iso}
-                ref={(el) => {
-                  dayCardRefs.current[iso] = el
-                }}
-                className={`week-day-card ${isSameDay(d, selected) ? 'week-day-card-active' : ''}`}
-              >
-                <div className="week-day-card-header">{fullDayLabel(d)}</div>
-                <div className="task-list">
-                  {dayTasks.length === 0 && <div className="empty-state empty-state-sm">Rien de prévu</div>}
-                  {dayTasks.map((t) => (
-                    <TaskRow key={t.id} task={t} dateIso={iso} onEdit={() => setEditing(t)} />
-                  ))}
-                </div>
-              </div>
-            )
-          })}
+      <div key={selectedIso} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
+        <div className="day-header">{fullDayLabel(selected)}</div>
+
+        <div className="task-list">
+          {dayTasks.length === 0 && <div className="empty-state">Rien de prévu</div>}
+          {dayTasks.map((t) => (
+            <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
+          ))}
         </div>
       </div>
 

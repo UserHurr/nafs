@@ -13,6 +13,7 @@ interface SyncState {
   setStatus: (status: SyncStatus) => void
   setLastSyncedAt: (iso: string) => void
   setError: (error: string | null) => void
+  setMemberId: (id: string) => void
 }
 
 export const useSyncStore = create<SyncState>()(
@@ -27,6 +28,7 @@ export const useSyncStore = create<SyncState>()(
       setStatus: (status) => set({ status }),
       setLastSyncedAt: (iso) => set({ lastSyncedAt: iso }),
       setError: (error) => set({ error }),
+      setMemberId: (id) => set({ memberId: id }),
     }),
     { name: 'nafs-sync' },
   ),

@@ -134,8 +134,8 @@ export function StatsPage() {
 }
 
 const themeSwatches: { id: Theme; label: string; colors: [string, string] }[] = [
-  { id: 'pink', label: 'Rose', colors: ['#fdf1f6', '#ec4899'] },
-  { id: 'blue', label: 'Bleu', colors: ['#eff6fd', '#2f7cf6'] },
+  { id: 'pink', label: 'Rose', colors: ['#faf1f0', '#b8677a'] },
+  { id: 'blue', label: 'Bleu', colors: ['#eff3f6', '#5c7c96'] },
 ]
 
 function ThemePicker() {

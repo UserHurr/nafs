@@ -18,7 +18,7 @@ function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     const meta = document.querySelector('meta[name="theme-color"]')
-    meta?.setAttribute('content', theme === 'blue' ? '#2f7cf6' : '#ec4899')
+    meta?.setAttribute('content', theme === 'blue' ? '#5c7c96' : '#b8677a')
   }, [theme])
 
   return (

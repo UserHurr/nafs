@@ -27,6 +27,8 @@ import {
   BedDouble,
   AlarmClock,
   BookOpenText,
+  BookMarked,
+  Repeat2,
   UserRound,
   Cat,
   Dog,
@@ -75,6 +77,8 @@ export const iconRegistry: Record<string, LucideIcon> = {
   bed: BedDouble,
   'alarm-clock': AlarmClock,
   'book-text': BookOpenText,
+  quran: BookMarked,
+  dhikr: Repeat2,
 
   user: UserRound,
   cat: Cat,
@@ -109,6 +113,8 @@ export const categoryIconChoices = [
   'paw',
   'cart',
   'gamepad',
+  'quran',
+  'dhikr',
 ]
 
 export const routineIconChoices = [
@@ -127,6 +133,8 @@ export const routineIconChoices = [
   'sparkles',
   'sun',
   'moon',
+  'quran',
+  'dhikr',
 ]
 
 export const avatarIconChoices = [

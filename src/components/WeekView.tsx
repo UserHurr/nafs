@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
@@ -24,6 +24,8 @@ export function WeekView({
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [dir, setDir] = useState(1)
+  const scrollerRef = useRef<HTMLDivElement>(null)
+  const dayCardRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const days = weekDays(anchor)
   const selectedIso = toIso(selected)
@@ -35,9 +37,15 @@ export function WeekView({
     onAnchorChange(addWeeks(anchor, direction))
   }
 
+  const jumpToDay = (d: Date) => {
+    setSelected(d)
+    dayCardRefs.current[toIso(d)]?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
+  }
+
   const swipe = useSwipeNav(
     () => goToWeek(-1),
     () => goToWeek(1),
+    '.week-day-card',
   )
 
   return (
@@ -51,7 +59,7 @@ export function WeekView({
             <button
               key={d.toISOString()}
               className={`week-day ${isSameDay(d, selected) ? 'week-day-active' : ''} ${isToday(d) ? 'week-day-today' : ''}`}
-              onClick={() => setSelected(d)}
+              onClick={() => jumpToDay(d)}
             >
               <span className="week-day-label">{weekdayShort(d)}</span>
               <span className="week-day-num">{dayNumber(d)}</span>
@@ -64,26 +72,29 @@ export function WeekView({
       </div>
 
       <div key={toIso(anchor)} className="view-slide" style={{ '--dir': dir } as React.CSSProperties}>
-        {days.map((d) => {
-          const iso = toIso(d)
-          const dayTasks = tasksOnDate(myTasks, iso)
-          return (
-            <div key={iso} className="week-day-block">
-              <button
-                className={`day-header week-day-block-header ${isSameDay(d, selected) ? 'week-day-block-header-active' : ''}`}
-                onClick={() => setSelected(d)}
+        <div className="week-scroller" ref={scrollerRef}>
+          {days.map((d) => {
+            const iso = toIso(d)
+            const dayTasks = tasksOnDate(myTasks, iso)
+            return (
+              <div
+                key={iso}
+                ref={(el) => {
+                  dayCardRefs.current[iso] = el
+                }}
+                className={`week-day-card ${isSameDay(d, selected) ? 'week-day-card-active' : ''}`}
               >
-                {fullDayLabel(d)}
-              </button>
-              <div className="task-list">
-                {dayTasks.length === 0 && <div className="empty-state empty-state-sm">Rien de prévu</div>}
-                {dayTasks.map((t) => (
-                  <TaskRow key={t.id} task={t} dateIso={iso} onEdit={() => setEditing(t)} />
-                ))}
+                <div className="week-day-card-header">{fullDayLabel(d)}</div>
+                <div className="task-list">
+                  {dayTasks.length === 0 && <div className="empty-state empty-state-sm">Rien de prévu</div>}
+                  {dayTasks.map((t) => (
+                    <TaskRow key={t.id} task={t} dateIso={iso} onEdit={() => setEditing(t)} />
+                  ))}
+                </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>

@@ -45,7 +45,10 @@ interface AppState {
 
   qadaTarget: Record<string, number>
   qadaBaseCount: Record<string, number>
-  qadaCompletions: Record<string, boolean>
+  /** Number of catch-up days logged per real calendar date — several can be
+   * logged on the same date since one can catch up on more than one missed
+   * day at a time. Key: `${dateIso}_${memberId}`. */
+  qadaDayCounts: Record<string, number>
 
   addCategory: (c: Omit<Category, 'id'>) => void
   updateCategory: (id: string, patch: Partial<Omit<Category, 'id'>>) => void
@@ -76,7 +79,8 @@ interface AppState {
 
   setQadaTarget: (memberId: string, n: number) => void
   setQadaBaseCount: (memberId: string, n: number) => void
-  toggleQadaDay: (dateIso: string) => void
+  incrementQadaDay: (dateIso: string) => void
+  decrementQadaDay: (dateIso: string) => void
 }
 
 export const useStore = create<AppState>()(
@@ -94,7 +98,7 @@ export const useStore = create<AppState>()(
 
       qadaTarget: {},
       qadaBaseCount: {},
-      qadaCompletions: {},
+      qadaDayCounts: {},
 
       addCategory: (c) =>
         set((s) => ({ categories: [...s.categories, { ...c, id: uid() }] })),
@@ -196,12 +200,34 @@ export const useStore = create<AppState>()(
         set((s) => ({ qadaTarget: { ...s.qadaTarget, [memberId]: Math.max(0, n) } })),
       setQadaBaseCount: (memberId, n) =>
         set((s) => ({ qadaBaseCount: { ...s.qadaBaseCount, [memberId]: Math.max(0, n) } })),
-      toggleQadaDay: (dateIso) =>
+      incrementQadaDay: (dateIso) =>
         set((s) => {
           const key = `${dateIso}_${myMemberId()}`
-          return { qadaCompletions: { ...s.qadaCompletions, [key]: !s.qadaCompletions[key] } }
+          return { qadaDayCounts: { ...s.qadaDayCounts, [key]: (s.qadaDayCounts[key] ?? 0) + 1 } }
+        }),
+      decrementQadaDay: (dateIso) =>
+        set((s) => {
+          const key = `${dateIso}_${myMemberId()}`
+          const next = Math.max(0, (s.qadaDayCounts[key] ?? 0) - 1)
+          return { qadaDayCounts: { ...s.qadaDayCounts, [key]: next } }
         }),
     }),
-    { name: 'nafs-store-v3' },
+    {
+      name: 'nafs-store-v3',
+      version: 1,
+      migrate: (persisted: unknown, version) => {
+        const state = persisted as Record<string, unknown>
+        if (version < 1 && state && typeof state === 'object' && 'qadaCompletions' in state) {
+          const qadaCompletions = state.qadaCompletions as Record<string, boolean>
+          const qadaDayCounts: Record<string, number> = {}
+          for (const [k, v] of Object.entries(qadaCompletions)) {
+            if (v) qadaDayCounts[k] = 1
+          }
+          const { qadaCompletions: _old, ...rest } = state
+          return { ...rest, qadaDayCounts }
+        }
+        return state
+      },
+    },
   ),
 )

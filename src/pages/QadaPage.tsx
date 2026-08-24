@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CalendarCheck2, Check, Flame } from 'lucide-react'
+import { CalendarCheck2, Flame, Minus, Plus } from 'lucide-react'
 import { useStore } from '../store'
 import { myMemberId } from '../syncStore'
 import { addDays, todayIso, toIso } from '../lib/dates'
@@ -9,12 +9,12 @@ import { vibrateDone } from '../lib/haptics'
 const DEFAULT_TARGET = 1825
 const DEFAULT_BASE = 186
 
-function computeStreak(qadaCompletions: Record<string, boolean>, me: string): number {
+function computeStreak(qadaDayCounts: Record<string, number>, me: string): number {
   let streak = 0
   let cursor = new Date()
   for (let i = 0; i < 3650; i++) {
     const cIso = toIso(cursor)
-    const done = !!qadaCompletions[`${cIso}_${me}`]
+    const done = (qadaDayCounts[`${cIso}_${me}`] ?? 0) > 0
     if (!done) {
       if (i === 0) {
         cursor = addDays(cursor, -1)
@@ -32,35 +32,36 @@ export function QadaPage() {
   const me = myMemberId()
   const qadaTarget = useStore((s) => s.qadaTarget)
   const qadaBaseCount = useStore((s) => s.qadaBaseCount)
-  const qadaCompletions = useStore((s) => s.qadaCompletions)
+  const qadaDayCounts = useStore((s) => s.qadaDayCounts)
   const setQadaTarget = useStore((s) => s.setQadaTarget)
   const setQadaBaseCount = useStore((s) => s.setQadaBaseCount)
-  const toggleQadaDay = useStore((s) => s.toggleQadaDay)
+  const incrementQadaDay = useStore((s) => s.incrementQadaDay)
+  const decrementQadaDay = useStore((s) => s.decrementQadaDay)
   const { fire, node } = useConfettiBurst()
 
   const target = qadaTarget[me] ?? DEFAULT_TARGET
   const base = qadaBaseCount[me] ?? DEFAULT_BASE
 
-  const doneDays = Object.keys(qadaCompletions).filter((k) => k.endsWith(`_${me}`) && qadaCompletions[k]).length
+  const doneDays = Object.entries(qadaDayCounts)
+    .filter(([k]) => k.endsWith(`_${me}`))
+    .reduce((sum, [, n]) => sum + n, 0)
   const total = Math.min(target, base + doneDays)
   const remaining = Math.max(0, target - total)
   const percent = target === 0 ? 0 : Math.min(100, Math.round((total / target) * 100))
 
   const iso = todayIso()
-  const todayDone = !!qadaCompletions[`${iso}_${me}`]
-  const streak = computeStreak(qadaCompletions, me)
+  const todayCount = qadaDayCounts[`${iso}_${me}`] ?? 0
+  const streak = computeStreak(qadaDayCounts, me)
 
   const [editing, setEditing] = useState(false)
   const [targetInput, setTargetInput] = useState(String(target))
   const [baseInput, setBaseInput] = useState(String(base))
 
-  const handleToggleToday = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!todayDone) {
-      const rect = e.currentTarget.getBoundingClientRect()
-      fire(rect.left + rect.width / 2, rect.top + rect.height / 2)
-      vibrateDone()
-    }
-    toggleQadaDay(iso)
+  const handleAddToday = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    fire(rect.left + rect.width / 2, rect.top + rect.height / 2)
+    vibrateDone()
+    incrementQadaDay(iso)
   }
 
   const saveSettings = () => {
@@ -99,10 +100,24 @@ export function QadaPage() {
         </div>
       )}
 
-      <button className={`qada-check-button ${todayDone ? 'qada-check-button-done' : ''}`} onClick={handleToggleToday}>
-        <span className="qada-check-circle">{todayDone && <Check size={22} strokeWidth={3} />}</span>
-        <span>{todayDone ? "Jour d'aujourd'hui rattrapé" : "Marquer aujourd'hui comme rattrapé"}</span>
+      <button
+        className={`qada-check-button ${todayCount > 0 ? 'qada-check-button-done' : ''}`}
+        onClick={handleAddToday}
+      >
+        <span className="qada-check-circle">
+          {todayCount > 0 ? todayCount : <Plus size={20} strokeWidth={3} />}
+        </span>
+        <span>
+          {todayCount > 0
+            ? `${todayCount} jour${todayCount > 1 ? 's' : ''} rattrapé${todayCount > 1 ? 's' : ''} aujourd'hui — toucher pour en ajouter un autre`
+            : "Marquer un jour comme rattrapé"}
+        </span>
       </button>
+      {todayCount > 0 && (
+        <button className="btn-ghost qada-undo-btn" onClick={() => decrementQadaDay(iso)}>
+          <Minus size={14} /> Retirer un jour (erreur de clic)
+        </button>
+      )}
 
       <div className="section-label">Réglages</div>
       <div className="stats-card">

@@ -2,18 +2,22 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Category, Member, Priority, RoutineItem, RoutineType, Task, Todo } from './types'
 import { myMemberId } from './syncStore'
+import { categoryColorChoicesForTheme } from './lib/colors'
 
 const uid = () => crypto.randomUUID()
 
+// Default theme is 'pink' — these shades stay within that gradient.
+const [c0, c1, c2, c3, c4, c5, c6, c7] = categoryColorChoicesForTheme('pink')
+
 const defaultCategories: Category[] = [
-  { id: 'travail', name: 'Travail', icon: 'briefcase', color: '#6366f1' },
-  { id: 'sport', name: 'Sport', icon: 'dumbbell', color: '#f97316' },
-  { id: 'etude', name: 'Étude', icon: 'book', color: '#3b82f6' },
-  { id: 'sante', name: 'Santé', icon: 'heart-pulse', color: '#22c55e' },
-  { id: 'social', name: 'Social', icon: 'users', color: '#ec4899' },
-  { id: 'maison', name: 'Maison', icon: 'home', color: '#a855f7' },
-  { id: 'repas', name: 'Repas', icon: 'utensils', color: '#eab308' },
-  { id: 'perso', name: 'Perso', icon: 'sparkles', color: '#14b8a6' },
+  { id: 'travail', name: 'Travail', icon: 'briefcase', color: c5 },
+  { id: 'sport', name: 'Sport', icon: 'dumbbell', color: c6 },
+  { id: 'etude', name: 'Étude', icon: 'book', color: c1 },
+  { id: 'sante', name: 'Santé', icon: 'heart-pulse', color: c3 },
+  { id: 'social', name: 'Social', icon: 'users', color: c4 },
+  { id: 'maison', name: 'Maison', icon: 'home', color: c2 },
+  { id: 'repas', name: 'Repas', icon: 'utensils', color: c0 },
+  { id: 'perso', name: 'Perso', icon: 'sparkles', color: c7 },
 ]
 
 const defaultMorningRoutine = (ownerId: string): RoutineItem[] => [
@@ -79,7 +83,7 @@ export const useStore = create<AppState>()(
   persist(
     (set) => ({
       categories: defaultCategories,
-      members: [{ id: myMemberId(), name: 'Moi', icon: 'user', color: '#ec4899' }],
+      members: [{ id: myMemberId(), name: 'Moi', icon: 'user', color: c4 }],
       tasks: [],
       todos: [],
       routines: { morning: defaultMorningRoutine(myMemberId()), evening: defaultEveningRoutine(myMemberId()) },

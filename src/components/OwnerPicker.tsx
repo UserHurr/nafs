@@ -18,7 +18,7 @@ export function OwnerPicker({ value, onChange }: { value: string; onChange: (id:
       <div className="chip-row">
         <button
           className={`chip ${value === me ? 'chip-active' : ''}`}
-          style={value === me ? { background: myMember?.color ?? 'var(--accent)', borderColor: 'transparent' } : undefined}
+          style={value === me ? { background: 'var(--accent)', borderColor: 'transparent' } : undefined}
           onClick={() => onChange(me)}
         >
           <Icon name={myMember?.icon} size={14} /> Moi
@@ -29,7 +29,7 @@ export function OwnerPicker({ value, onChange }: { value: string; onChange: (id:
             <button
               key={m.id}
               className={`chip ${value === m.id ? 'chip-active' : ''}`}
-              style={value === m.id ? { background: m.color, borderColor: 'transparent' } : undefined}
+              style={value === m.id ? { background: 'var(--accent-2)', borderColor: 'transparent' } : undefined}
               onClick={() => onChange(m.id)}
             >
               <Icon name={m.icon} size={14} /> {m.name}

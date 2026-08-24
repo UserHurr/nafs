@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { DayView } from '../components/DayView'
 import { WeekView } from '../components/WeekView'
 import { MonthView } from '../components/MonthView'
 import { YearView } from '../components/YearView'
 import { useStore } from '../store'
 import { useFilterStore } from '../filterStore'
 
-type SubView = 'day' | 'week' | 'month' | 'year'
+type SubView = 'week' | 'month' | 'year'
 
 export function AgendaPage() {
   const [subView, setSubView] = useState<SubView>('week')
@@ -20,9 +19,6 @@ export function AgendaPage() {
       <div className="sub-tabs">
         <button className={subView === 'week' ? 'active' : ''} onClick={() => setSubView('week')}>
           Semaine
-        </button>
-        <button className={subView === 'day' ? 'active' : ''} onClick={() => setSubView('day')}>
-          Jour
         </button>
         <button className={subView === 'month' ? 'active' : ''} onClick={() => setSubView('month')}>
           Mois
@@ -46,7 +42,6 @@ export function AgendaPage() {
         </div>
       )}
 
-      {subView === 'day' && <DayView anchor={anchor} onAnchorChange={setAnchor} filter={filter} />}
       {subView === 'week' && <WeekView anchor={anchor} onAnchorChange={setAnchor} filter={filter} />}
       {subView === 'month' && <MonthView anchor={anchor} onAnchorChange={setAnchor} filter={filter} />}
       {subView === 'year' && (

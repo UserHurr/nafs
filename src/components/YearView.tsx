@@ -5,6 +5,7 @@ import { tasksOnDate } from '../lib/recurrence'
 import { addYears, isToday, monthGrid, toIso } from '../lib/dates'
 import { format, isSameMonth as sameMonthFn } from 'date-fns'
 import { fr } from 'date-fns/locale'
+import { DayDetailModal } from './DayDetailModal'
 import { myMemberId } from '../syncStore'
 import { visibleTasks, type OwnershipFilter } from '../lib/members'
 import { useSwipeNav } from '../hooks/useSwipeNav'
@@ -25,6 +26,7 @@ export function YearView({
   const year = anchor.getFullYear()
   const months = Array.from({ length: 12 }, (_, i) => new Date(year, i, 1))
   const [dir, setDir] = useState(1)
+  const [detailIso, setDetailIso] = useState<string | undefined>(undefined)
 
   const goToYear = (d: Date, direction: number) => {
     setDir(direction)
@@ -50,23 +52,29 @@ export function YearView({
 
       <div key={year} className="year-grid view-slide" style={{ '--dir': dir } as React.CSSProperties}>
         {months.map((m) => (
-          <button key={m.toISOString()} className="mini-month" onClick={() => onSelectMonth(m)}>
+          <div key={m.toISOString()} className="mini-month" onClick={() => onSelectMonth(m)}>
             <div className="mini-month-title">{format(m, 'LLLL', { locale: fr })}</div>
             <div className="mini-month-grid">
               {monthGrid(m).map((d) => {
                 const iso = toIso(d)
                 const hasTasks = tasksOnDate(myTasks, iso).length > 0
                 return (
-                  <span
+                  <button
                     key={iso}
                     className={`mini-day ${sameMonthFn(d, m) ? '' : 'mini-day-outside'} ${isToday(d) ? 'mini-day-today' : ''} ${hasTasks ? 'mini-day-has-task' : ''}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setDetailIso(iso)
+                    }}
                   />
                 )
               })}
             </div>
-          </button>
+          </div>
         ))}
       </div>
+
+      {detailIso && <DayDetailModal dateIso={detailIso} filter={filter} onClose={() => setDetailIso(undefined)} />}
     </div>
   )
 }

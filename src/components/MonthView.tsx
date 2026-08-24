@@ -2,20 +2,9 @@ import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
-import {
-  addMonths,
-  dayNumber,
-  fullDayLabel,
-  isSameDay,
-  isSameMonth,
-  isToday,
-  monthGrid,
-  monthLabel,
-  toIso,
-} from '../lib/dates'
-import { TaskRow } from './TaskRow'
+import { addMonths, dayNumber, isSameMonth, isToday, monthGrid, monthLabel, toIso } from '../lib/dates'
+import { DayDetailModal } from './DayDetailModal'
 import { TaskFormModal } from './TaskFormModal'
-import type { Task } from '../types'
 import { myMemberId } from '../syncStore'
 import { visibleTasks, type OwnershipFilter } from '../lib/members'
 import { useSwipeNav } from '../hooks/useSwipeNav'
@@ -33,19 +22,15 @@ export function MonthView({
 }) {
   const tasks = useStore((s) => s.tasks)
   const categories = useStore((s) => s.categories)
-  const [selected, setSelected] = useState(anchor)
+  const [detailIso, setDetailIso] = useState<string | undefined>(undefined)
   const [showAdd, setShowAdd] = useState(false)
-  const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [dir, setDir] = useState(1)
 
   const myTasks = visibleTasks(tasks, myMemberId(), filter)
   const days = monthGrid(anchor)
-  const selectedIso = toIso(selected)
-  const dayTasks = tasksOnDate(myTasks, selectedIso)
 
   const goToMonth = (d: Date, direction: number) => {
     setDir(direction)
-    setSelected((s) => addMonths(s, direction))
     onAnchorChange(d)
   }
 
@@ -85,8 +70,8 @@ export function MonthView({
           return (
             <button
               key={iso}
-              className={`month-cell ${isSameMonth(d, anchor) ? '' : 'month-cell-outside'} ${isSameDay(d, selected) ? 'month-cell-selected' : ''} ${isToday(d) ? 'month-cell-today' : ''}`}
-              onClick={() => setSelected(d)}
+              className={`month-cell ${isSameMonth(d, anchor) ? '' : 'month-cell-outside'} ${isToday(d) ? 'month-cell-today' : ''}`}
+              onClick={() => setDetailIso(iso)}
             >
               <span className="month-cell-num">{dayNumber(d)}</span>
               <span className="month-cell-dots">
@@ -98,22 +83,14 @@ export function MonthView({
           )
         })}
       </div>
-
-      <div className="day-header">{fullDayLabel(selected)}</div>
-      <div className="task-list">
-        {dayTasks.length === 0 && <div className="empty-state">Rien de prévu</div>}
-        {dayTasks.map((t) => (
-          <TaskRow key={t.id} task={t} dateIso={selectedIso} onEdit={() => setEditing(t)} />
-        ))}
-      </div>
       </div>
 
       <button className="fab" onClick={() => setShowAdd(true)}>
         +
       </button>
 
-      {showAdd && <TaskFormModal defaultDate={selectedIso} onClose={() => setShowAdd(false)} />}
-      {editing && <TaskFormModal editingTask={editing} defaultDate={selectedIso} onClose={() => setEditing(undefined)} />}
+      {showAdd && <TaskFormModal defaultDate={toIso(anchor)} onClose={() => setShowAdd(false)} />}
+      {detailIso && <DayDetailModal dateIso={detailIso} filter={filter} onClose={() => setDetailIso(undefined)} />}
     </div>
   )
 }

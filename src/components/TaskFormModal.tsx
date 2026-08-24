@@ -7,8 +7,9 @@ import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
 import { OwnerPicker } from './OwnerPicker'
 import { Icon, categoryIconChoices } from '../lib/icons'
-import { categoryColorChoices } from '../lib/colors'
+import { categoryColorChoicesForTheme } from '../lib/colors'
 import { useToastStore } from '../toastStore'
+import { useThemeStore } from '../themeStore'
 
 const weekdayLabels = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 
@@ -54,10 +55,13 @@ export function TaskFormModal({
   const notificationsEnabled = useStore((s) => s.notificationsEnabled)
   const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled)
 
+  const theme = useThemeStore((s) => s.theme)
+  const colorChoices = categoryColorChoicesForTheme(theme)
+
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [newCatName, setNewCatName] = useState('')
   const [newCatIcon, setNewCatIcon] = useState('sparkles')
-  const [newCatColor, setNewCatColor] = useState(categoryColorChoices[0])
+  const [newCatColor, setNewCatColor] = useState(colorChoices[4])
 
   const toggleDay = (d: number) => {
     setDaysOfWeek((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()))
@@ -151,7 +155,7 @@ export function TaskFormModal({
               ))}
             </div>
             <div className="color-swatch-row">
-              {categoryColorChoices.map((c) => (
+              {colorChoices.map((c) => (
                 <button
                   key={c}
                   className={`color-swatch ${newCatColor === c ? 'color-swatch-active' : ''}`}

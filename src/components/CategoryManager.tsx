@@ -2,12 +2,15 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import { Icon, categoryIconChoices } from '../lib/icons'
-import { categoryColorChoices } from '../lib/colors'
+import { categoryColorChoicesForTheme } from '../lib/colors'
+import { useThemeStore } from '../themeStore'
 import type { Category } from '../types'
 
 function CategoryRow({ category }: { category: Category }) {
   const updateCategory = useStore((s) => s.updateCategory)
   const removeCategory = useStore((s) => s.removeCategory)
+  const theme = useThemeStore((s) => s.theme)
+  const colorChoices = categoryColorChoicesForTheme(theme)
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(category.name)
   const [icon, setIcon] = useState(category.icon)
@@ -46,7 +49,7 @@ function CategoryRow({ category }: { category: Category }) {
         ))}
       </div>
       <div className="color-swatch-row">
-        {categoryColorChoices.map((c) => (
+        {colorChoices.map((c) => (
           <button
             key={c}
             className={`color-swatch ${color === c ? 'color-swatch-active' : ''}`}

@@ -3,6 +3,7 @@ import { BottomNav, type Tab } from './components/BottomNav'
 import { AgendaPage } from './pages/AgendaPage'
 import { TodoPage } from './pages/TodoPage'
 import { RoutinesPage } from './pages/RoutinesPage'
+import { QadaPage } from './pages/QadaPage'
 import { StatsPage } from './pages/StatsPage'
 import { useReminderChecker } from './hooks/useReminderChecker'
 import { useCloudSync } from './hooks/useCloudSync'
@@ -29,6 +30,7 @@ function App() {
         {tab === 'agenda' && <AgendaPage />}
         {tab === 'todo' && <TodoPage />}
         {tab === 'routines' && <RoutinesPage />}
+        {tab === 'qada' && <QadaPage />}
         {tab === 'stats' && <StatsPage />}
       </main>
       <BottomNav active={tab} onChange={setTab} />

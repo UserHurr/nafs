@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import { tasksOnDate } from '../lib/recurrence'
 import { addWeeks, dayNumber, isToday, toIso, weekDays, weekdayShort } from '../lib/dates'
 import { TaskFormModal } from './TaskFormModal'
+import { TaskPreviewModal } from './TaskPreviewModal'
 import { Icon } from '../lib/icons'
 import { taskCompletionKey, visibleTasks, type OwnershipFilter } from '../lib/members'
 import { myMemberId } from '../syncStore'
@@ -24,6 +25,7 @@ export function WeekView({
   const taskCompletions = useStore((s) => s.taskCompletions)
   const [showAdd, setShowAdd] = useState(false)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
+  const [previewing, setPreviewing] = useState<{ task: Task; dateIso: string } | undefined>(undefined)
   const [dir, setDir] = useState(1)
 
   const me = myMemberId()
@@ -81,7 +83,7 @@ export function WeekView({
                         className={`week-grid-task ${done ? 'week-grid-task-done' : ''}`}
                         style={{ background: category?.color ?? 'var(--accent)' }}
                         title={t.title}
-                        onClick={() => setEditing(t)}
+                        onClick={() => setPreviewing({ task: t, dateIso: iso })}
                       >
                         <Icon name={category?.icon} size={11} />
                       </button>
@@ -99,6 +101,17 @@ export function WeekView({
       </button>
 
       {showAdd && <TaskFormModal defaultDate={todayIsoStr} onClose={() => setShowAdd(false)} />}
+      {previewing && (
+        <TaskPreviewModal
+          task={previewing.task}
+          dateIso={previewing.dateIso}
+          onClose={() => setPreviewing(undefined)}
+          onEdit={() => {
+            setEditing(previewing.task)
+            setPreviewing(undefined)
+          }}
+        />
+      )}
       {editing && (
         <TaskFormModal editingTask={editing} defaultDate={todayIsoStr} onClose={() => setEditing(undefined)} />
       )}

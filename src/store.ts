@@ -39,6 +39,10 @@ interface AppState {
   notificationsEnabled: boolean
   notifiedReminders: Record<string, boolean>
 
+  qadaTarget: Record<string, number>
+  qadaBaseCount: Record<string, number>
+  qadaCompletions: Record<string, boolean>
+
   addCategory: (c: Omit<Category, 'id'>) => void
   updateCategory: (id: string, patch: Partial<Omit<Category, 'id'>>) => void
   removeCategory: (id: string) => void
@@ -65,6 +69,10 @@ interface AppState {
 
   setNotificationsEnabled: (enabled: boolean) => void
   markReminderNotified: (taskId: string, dateIso: string) => void
+
+  setQadaTarget: (memberId: string, n: number) => void
+  setQadaBaseCount: (memberId: string, n: number) => void
+  toggleQadaDay: (dateIso: string) => void
 }
 
 export const useStore = create<AppState>()(
@@ -79,6 +87,10 @@ export const useStore = create<AppState>()(
       routineCompletions: {},
       notificationsEnabled: false,
       notifiedReminders: {},
+
+      qadaTarget: {},
+      qadaBaseCount: {},
+      qadaCompletions: {},
 
       addCategory: (c) =>
         set((s) => ({ categories: [...s.categories, { ...c, id: uid() }] })),
@@ -175,6 +187,16 @@ export const useStore = create<AppState>()(
       setNotificationsEnabled: (enabled) => set({ notificationsEnabled: enabled }),
       markReminderNotified: (taskId, dateIso) =>
         set((s) => ({ notifiedReminders: { ...s.notifiedReminders, [`${taskId}_${dateIso}`]: true } })),
+
+      setQadaTarget: (memberId, n) =>
+        set((s) => ({ qadaTarget: { ...s.qadaTarget, [memberId]: Math.max(0, n) } })),
+      setQadaBaseCount: (memberId, n) =>
+        set((s) => ({ qadaBaseCount: { ...s.qadaBaseCount, [memberId]: Math.max(0, n) } })),
+      toggleQadaDay: (dateIso) =>
+        set((s) => {
+          const key = `${dateIso}_${myMemberId()}`
+          return { qadaCompletions: { ...s.qadaCompletions, [key]: !s.qadaCompletions[key] } }
+        }),
     }),
     { name: 'nafs-store-v3' },
   ),

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Category, Member, Priority, RoutineItem, RoutineType, Task, Todo } from './types'
+import type { Category, Habit, Member, Priority, RoutineItem, RoutineType, Task, Todo } from './types'
 import { myMemberId } from './syncStore'
 import { categoryColorChoicesForTheme } from './lib/colors'
 
@@ -50,6 +50,10 @@ interface AppState {
    * day at a time. Key: `${dateIso}_${memberId}`. */
   qadaDayCounts: Record<string, number>
 
+  habits: Habit[]
+  /** Key: `${habitId}_${dateIso}_${memberId}`. */
+  habitCompletions: Record<string, boolean>
+
   addCategory: (c: Omit<Category, 'id'>) => void
   updateCategory: (id: string, patch: Partial<Omit<Category, 'id'>>) => void
   removeCategory: (id: string) => void
@@ -81,6 +85,10 @@ interface AppState {
   setQadaBaseCount: (memberId: string, n: number) => void
   incrementQadaDay: (dateIso: string) => void
   decrementQadaDay: (dateIso: string) => void
+
+  addHabit: (name: string, icon: string, ownerId: string) => void
+  removeHabit: (id: string) => void
+  toggleHabitDay: (habitId: string, dateIso: string) => void
 }
 
 export const useStore = create<AppState>()(
@@ -99,6 +107,9 @@ export const useStore = create<AppState>()(
       qadaTarget: {},
       qadaBaseCount: {},
       qadaDayCounts: {},
+
+      habits: [],
+      habitCompletions: {},
 
       addCategory: (c) =>
         set((s) => ({ categories: [...s.categories, { ...c, id: uid() }] })),
@@ -210,6 +221,23 @@ export const useStore = create<AppState>()(
           const key = `${dateIso}_${myMemberId()}`
           const next = Math.max(0, (s.qadaDayCounts[key] ?? 0) - 1)
           return { qadaDayCounts: { ...s.qadaDayCounts, [key]: next } }
+        }),
+
+      addHabit: (name, icon, ownerId) =>
+        set((s) => ({
+          habits: [...s.habits, { id: uid(), name, icon, ownerId, createdAt: new Date().toISOString() }],
+        })),
+      removeHabit: (id) =>
+        set((s) => ({
+          habits: s.habits.filter((h) => h.id !== id),
+          habitCompletions: Object.fromEntries(
+            Object.entries(s.habitCompletions).filter(([k]) => !k.startsWith(`${id}_`)),
+          ),
+        })),
+      toggleHabitDay: (habitId, dateIso) =>
+        set((s) => {
+          const key = `${habitId}_${dateIso}_${myMemberId()}`
+          return { habitCompletions: { ...s.habitCompletions, [key]: !s.habitCompletions[key] } }
         }),
     }),
     {

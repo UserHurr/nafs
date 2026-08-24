@@ -1,4 +1,4 @@
-import { SHARED_OWNER, type RoutineItem, type Task, type Todo } from '../types'
+import { SHARED_OWNER, type Habit, type RoutineItem, type Task, type Todo } from '../types'
 
 export const isShared = (ownerId: string) => ownerId === SHARED_OWNER
 
@@ -24,6 +24,10 @@ export function visibleRoutineItems(items: RoutineItem[], myId: string, filter: 
   return items.filter((i) => matchesFilter(i.ownerId, myId, filter))
 }
 
+export function visibleHabits(habits: Habit[], myId: string, filter: OwnershipFilter = 'all'): Habit[] {
+  return habits.filter((h) => matchesFilter(h.ownerId, myId, filter))
+}
+
 export const taskCompletionKey = (taskId: string, dateIso: string, memberId: string) =>
   `${taskId}_${dateIso}_${memberId}`
 
@@ -33,3 +37,6 @@ export const routineCompletionKey = (
   dateIso: string,
   memberId: string,
 ) => `${type}_${itemId}_${dateIso}_${memberId}`
+
+export const habitCompletionKey = (habitId: string, dateIso: string, memberId: string) =>
+  `${habitId}_${dateIso}_${memberId}`

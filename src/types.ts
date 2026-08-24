@@ -68,3 +68,11 @@ export interface RoutineItem {
   icon: string
   ownerId: string
 }
+
+export interface Habit {
+  id: string
+  name: string
+  icon: string
+  ownerId: string
+  createdAt: string
+}

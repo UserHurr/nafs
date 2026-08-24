@@ -18,11 +18,11 @@ export function AgendaPage() {
   return (
     <div className="page">
       <div className="sub-tabs">
-        <button className={subView === 'day' ? 'active' : ''} onClick={() => setSubView('day')}>
-          Jour
-        </button>
         <button className={subView === 'week' ? 'active' : ''} onClick={() => setSubView('week')}>
           Semaine
+        </button>
+        <button className={subView === 'day' ? 'active' : ''} onClick={() => setSubView('day')}>
+          Jour
         </button>
         <button className={subView === 'month' ? 'active' : ''} onClick={() => setSubView('month')}>
           Mois

@@ -87,6 +87,7 @@ interface AppState {
   decrementQadaDay: (dateIso: string) => void
 
   addHabit: (name: string, icon: string, ownerId: string) => void
+  updateHabit: (id: string, patch: Partial<Omit<Habit, 'id' | 'createdAt'>>) => void
   removeHabit: (id: string) => void
   toggleHabitDay: (habitId: string, dateIso: string) => void
 }
@@ -227,6 +228,8 @@ export const useStore = create<AppState>()(
         set((s) => ({
           habits: [...s.habits, { id: uid(), name, icon, ownerId, createdAt: new Date().toISOString() }],
         })),
+      updateHabit: (id, patch) =>
+        set((s) => ({ habits: s.habits.map((h) => (h.id === id ? { ...h, ...patch } : h)) })),
       removeHabit: (id) =>
         set((s) => ({
           habits: s.habits.filter((h) => h.id !== id),

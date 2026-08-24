@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Flame, Repeat2, Trash2 } from 'lucide-react'
+import { Flame, Pencil, Repeat2, Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import { myMemberId } from '../syncStore'
 import { Icon, routineIconChoices } from '../lib/icons'
@@ -34,12 +34,48 @@ function HabitCard({ habit, granularity }: { habit: Habit; granularity: Granular
   const me = myMemberId()
   const habitCompletions = useStore((s) => s.habitCompletions)
   const toggleHabitDay = useStore((s) => s.toggleHabitDay)
+  const updateHabit = useStore((s) => s.updateHabit)
   const removeHabit = useStore((s) => s.removeHabit)
+
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState(habit.name)
+  const [icon, setIcon] = useState(habit.icon)
+  const [ownerId, setOwnerId] = useState(habit.ownerId)
 
   const streak = computeHabitStreak(habitCompletions, habit.id, me)
   const todayIsoStr = todayIso()
   const today = new Date()
   const days = granularity === 'week' ? weekDays(today) : monthGrid(today)
+
+  const save = () => {
+    updateHabit(habit.id, { name: name.trim() || habit.name, icon, ownerId })
+    setEditing(false)
+  }
+
+  if (editing) {
+    return (
+      <div className="new-category-box habit-card">
+        <div className="emoji-grid">
+          {routineIconChoices.map((key) => (
+            <button
+              key={key}
+              className={`emoji-btn ${icon === key ? 'emoji-btn-active' : ''}`}
+              onClick={() => setIcon(key)}
+            >
+              <Icon name={key} size={16} />
+            </button>
+          ))}
+        </div>
+        <OwnerPicker value={ownerId} onChange={setOwnerId} />
+        <div className="row-gap" style={{ marginTop: 8 }}>
+          <input className="text-input" value={name} onChange={(e) => setName(e.target.value)} />
+          <button className="btn-small" onClick={save}>
+            OK
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="stats-card habit-card">
@@ -51,6 +87,9 @@ function HabitCard({ habit, granularity }: { habit: Habit; granularity: Granular
             <Flame size={12} /> {streak}j
           </span>
         )}
+        <button className="task-delete" onClick={() => setEditing(true)}>
+          <Pencil size={14} />
+        </button>
         <button className="task-delete" onClick={() => removeHabit(habit.id)}>
           <Trash2 size={14} />
         </button>

@@ -23,7 +23,7 @@ export function WeekView({
   const tasks = useStore((s) => s.tasks)
   const categories = useStore((s) => s.categories)
   const taskCompletions = useStore((s) => s.taskCompletions)
-  const [showAdd, setShowAdd] = useState(false)
+  const [addDate, setAddDate] = useState<string | undefined>(undefined)
   const [editing, setEditing] = useState<Task | undefined>(undefined)
   const [previewing, setPreviewing] = useState<{ task: Task; dateIso: string } | undefined>(undefined)
   const [dir, setDir] = useState(1)
@@ -66,7 +66,11 @@ export function WeekView({
             const iso = toIso(d)
             const dayTasks = tasksOnDate(myTasks, iso)
             return (
-              <div key={iso} className={`week-grid-day ${isToday(d) ? 'week-grid-day-today' : ''}`}>
+              <div
+                key={iso}
+                className={`week-grid-day ${isToday(d) ? 'week-grid-day-today' : ''}`}
+                onClick={() => setAddDate(iso)}
+              >
                 <div className="week-grid-day-header">
                   <span>{weekdayShort(d)}</span>
                   <span className={`week-grid-day-num ${iso === todayIsoStr ? 'week-grid-day-num-today' : ''}`}>
@@ -83,7 +87,10 @@ export function WeekView({
                         className={`week-grid-task ${done ? 'week-grid-task-done' : ''}`}
                         style={{ background: category?.color ?? 'var(--accent)' }}
                         title={t.title}
-                        onClick={() => setPreviewing({ task: t, dateIso: iso })}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setPreviewing({ task: t, dateIso: iso })
+                        }}
                       >
                         <span className="week-grid-task-title-row">
                           <Icon name={category?.icon} size={9} className="week-grid-task-icon" />
@@ -102,11 +109,11 @@ export function WeekView({
         </div>
       </div>
 
-      <button className="fab" onClick={() => setShowAdd(true)}>
+      <button className="fab" onClick={() => setAddDate(todayIsoStr)}>
         +
       </button>
 
-      {showAdd && <TaskFormModal defaultDate={todayIsoStr} onClose={() => setShowAdd(false)} />}
+      {addDate && <TaskFormModal defaultDate={addDate} onClose={() => setAddDate(undefined)} />}
       {previewing && (
         <TaskPreviewModal
           task={previewing.task}

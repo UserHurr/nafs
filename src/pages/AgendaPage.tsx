@@ -30,10 +30,7 @@ export function AgendaPage() {
 
       {members.length > 1 && (
         <div className="segmented filter-segmented">
-          <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
-            Tout
-          </button>
-          <button className={filter === 'mine' ? 'active' : ''} onClick={() => setFilter('mine')}>
+          <button className={filter !== 'shared' ? 'active' : ''} onClick={() => setFilter('mine')}>
             Moi
           </button>
           <button className={filter === 'shared' ? 'active' : ''} onClick={() => setFilter('shared')}>

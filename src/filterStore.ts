@@ -10,7 +10,7 @@ interface FilterState {
 export const useFilterStore = create<FilterState>()(
   persist(
     (set) => ({
-      filter: 'all',
+      filter: 'mine',
       setFilter: (filter) => set({ filter }),
     }),
     { name: 'nafs-filter' },

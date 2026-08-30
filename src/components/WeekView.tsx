@@ -86,7 +86,7 @@ export function WeekView({
                         onClick={() => setPreviewing({ task: t, dateIso: iso })}
                       >
                         <span className="week-grid-task-title-row">
-                          <Icon name={category?.icon} size={8} className="week-grid-task-icon" />
+                          <Icon name={category?.icon} size={9} className="week-grid-task-icon" />
                           <span className="week-grid-task-title">{t.title}</span>
                         </span>
                         {t.timeType === 'timed' && t.startTime && (

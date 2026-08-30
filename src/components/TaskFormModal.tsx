@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Bell, Clock, Pin, Repeat, Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import type { Recurrence, RecurrenceFreq, Task, TimeType } from '../types'
-import { toIso } from '../lib/dates'
+import { minutesToTime, timeToMinutes, toIso } from '../lib/dates'
 import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
 import { OwnerPicker } from './OwnerPicker'
@@ -41,7 +41,11 @@ export function TaskFormModal({
   const [categoryId, setCategoryId] = useState(editingTask?.categoryId ?? categories[0]?.id ?? '')
   const [timeType, setTimeType] = useState<TimeType>(editingTask?.timeType ?? 'allday')
   const [startTime, setStartTime] = useState(editingTask?.startTime ?? '09:00')
-  const [duration, setDuration] = useState(editingTask?.duration ?? 30)
+  const [endTime, setEndTime] = useState(() => {
+    const start = editingTask?.startTime ?? '09:00'
+    const dur = editingTask?.duration ?? 30
+    return minutesToTime(timeToMinutes(start) + dur)
+  })
   const [date, setDate] = useState(editingTask?.date ?? defaultDate)
   const [notes, setNotes] = useState(editingTask?.notes ?? '')
 
@@ -85,7 +89,7 @@ export function TaskFormModal({
       categoryId,
       timeType,
       startTime: timeType === 'timed' ? startTime : undefined,
-      duration: timeType === 'timed' ? duration : undefined,
+      duration: timeType === 'timed' ? Math.max(5, timeToMinutes(endTime) - timeToMinutes(startTime)) : undefined,
       date,
       recurrence,
       notes: notes.trim() || undefined,
@@ -200,14 +204,12 @@ export function TaskFormModal({
               />
             </div>
             <div className="time-duration-field">
-              <label className="field-label">Durée (min)</label>
+              <label className="field-label">Jusqu'à</label>
               <input
                 className="text-input"
-                type="number"
-                min={5}
-                step={5}
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
               />
             </div>
           </div>

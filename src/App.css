@@ -150,51 +150,41 @@
   margin-top: 12px;
 }
 
-.week-grid {
+.week-timegrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  height: calc(100dvh - 260px);
-  min-height: 340px;
+  grid-template-columns: 22px repeat(7, 1fr);
+  gap: 3px;
+  align-items: start;
 }
 
-.week-grid-day {
-  display: flex;
-  flex-direction: column;
-  background: var(--bg-card);
-  border-radius: 10px;
-  padding: 4px 2px 6px;
-  min-width: 0;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  cursor: pointer;
+.week-timegrid-corner {
+  grid-column: 1;
 }
 
-.week-grid-day-today {
-  box-shadow: 0 0 0 1.5px var(--accent);
-}
-
-.week-grid-day-header {
+.week-timegrid-day-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
-  padding-bottom: 4px;
-  margin-bottom: 4px;
+  padding: 2px 0 6px;
   border-bottom: 1px solid var(--border);
   font-size: 9px;
   font-weight: 700;
   color: var(--text-dim);
   text-transform: uppercase;
-  flex-shrink: 0;
+  cursor: pointer;
 }
 
-.week-grid-day-num {
+.week-timegrid-day-header-today {
+  color: var(--accent);
+}
+
+.week-timegrid-day-num {
   font-size: 13px;
   color: var(--text);
 }
 
-.week-grid-day-num-today {
+.week-timegrid-day-header-today .week-timegrid-day-num {
   color: white;
   background: var(--accent);
   width: 20px;
@@ -205,12 +195,21 @@
   justify-content: center;
 }
 
-.week-grid-tasks {
+.week-timegrid-hour-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-align: right;
+  padding-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.week-timegrid-cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  overflow-y: auto;
-  flex: 1;
+  gap: 3px;
+  min-height: 18px;
+  min-width: 0;
 }
 
 .week-grid-task {

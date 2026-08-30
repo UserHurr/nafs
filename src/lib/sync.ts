@@ -36,20 +36,25 @@ export async function pullState(code: string): Promise<RemoteRow | null> {
   return { data: data.data as SyncPayload, updated_at: data.updated_at as string }
 }
 
+// Local always wins over remote for an id present on both sides — local is
+// this device's most recent edit (including the one about to be pushed), so
+// a background pull/merge must never silently discard it. Remote only fills
+// in ids this device doesn't have yet (the other device's own items).
 function unionById<T extends { id: string }>(remote: T[], local: T[], deletedIds: Record<string, string>): T[] {
   const byId = new Map(remote.map((item) => [item.id, item]))
   for (const item of local) {
-    if (!byId.has(item.id)) byId.set(item.id, item)
+    byId.set(item.id, item)
   }
   return [...byId.values()].filter((item) => !(item.id in deletedIds))
 }
 
 /**
  * Merges local and remote payloads — used both when a device (re)connects to
- * a code and on every ongoing sync cycle. Items are unioned by id, except
- * those with a tombstone in deletedIds (populated by the remove* store
- * actions): a deletion made on either side sticks instead of being silently
- * re-added by the other device's copy.
+ * a code and on every ongoing sync cycle. Items are unioned by id (local
+ * wins on conflicts, see unionById), except those with a tombstone in
+ * deletedIds (populated by the remove* store actions): a deletion made on
+ * either side sticks instead of being silently re-added by the other
+ * device's copy.
  */
 export function mergePayloads(local: SyncPayload, remote: SyncPayload): SyncPayload {
   const deletedIds = { ...remote.deletedIds, ...local.deletedIds }

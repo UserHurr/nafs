@@ -23,6 +23,7 @@ function extractPayload(): SyncPayload {
     routines: s.routines,
     taskCompletions: s.taskCompletions,
     routineCompletions: s.routineCompletions,
+    deletedIds: s.deletedIds,
   }
 }
 
@@ -40,10 +41,21 @@ export function useCloudSync() {
   const pushTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastRemoteUpdatedAt = useRef<string | null>(null)
 
+  // Both push and pull merge against the latest remote copy (tombstone-aware,
+  // see mergePayloads) rather than blindly overwriting either side — this is
+  // what makes a deletion made on one device stick instead of being silently
+  // re-added by the other device's next sync.
   const push = useCallback(
     async (activeCode: string) => {
       try {
-        await pushState(activeCode, extractPayload())
+        const remote = await pullState(activeCode)
+        const merged = remote ? mergePayloads(extractPayload(), remote.data) : extractPayload()
+        if (remote) {
+          applyingRemote.current = true
+          applyPayload(merged)
+          applyingRemote.current = false
+        }
+        await pushState(activeCode, merged)
         lastRemoteUpdatedAt.current = new Date().toISOString()
         setLastSyncedAt(new Date().toISOString())
         setStatus('connected')
@@ -62,8 +74,9 @@ export function useCloudSync() {
         const remote = await pullState(activeCode)
         if (remote && remote.updated_at !== lastRemoteUpdatedAt.current) {
           lastRemoteUpdatedAt.current = remote.updated_at
+          const merged = mergePayloads(extractPayload(), remote.data)
           applyingRemote.current = true
-          applyPayload(remote.data)
+          applyPayload(merged)
           applyingRemote.current = false
           setLastSyncedAt(remote.updated_at)
         }

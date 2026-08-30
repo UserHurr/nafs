@@ -54,6 +54,11 @@ interface AppState {
   /** Key: `${habitId}_${dateIso}_${memberId}`. */
   habitCompletions: Record<string, boolean>
 
+  /** Tombstones for deleted categories/tasks/todos/routine items, keyed by
+   * id, so a deletion made on one synced device sticks instead of being
+   * silently re-added by the other device's next sync. */
+  deletedIds: Record<string, string>
+
   addCategory: (c: Omit<Category, 'id'>) => void
   updateCategory: (id: string, patch: Partial<Omit<Category, 'id'>>) => void
   removeCategory: (id: string) => void
@@ -112,12 +117,17 @@ export const useStore = create<AppState>()(
       habits: [],
       habitCompletions: {},
 
+      deletedIds: {},
+
       addCategory: (c) =>
         set((s) => ({ categories: [...s.categories, { ...c, id: uid() }] })),
       updateCategory: (id, patch) =>
         set((s) => ({ categories: s.categories.map((c) => (c.id === id ? { ...c, ...patch } : c)) })),
       removeCategory: (id) =>
-        set((s) => ({ categories: s.categories.filter((c) => c.id !== id) })),
+        set((s) => ({
+          categories: s.categories.filter((c) => c.id !== id),
+          deletedIds: { ...s.deletedIds, [id]: new Date().toISOString() },
+        })),
 
       addMember: (m) =>
         set((s) => (s.members.some((x) => x.id === m.id) ? s : { members: [...s.members, m] })),
@@ -136,6 +146,7 @@ export const useStore = create<AppState>()(
           taskCompletions: Object.fromEntries(
             Object.entries(s.taskCompletions).filter(([k]) => !k.startsWith(`${id}_`)),
           ),
+          deletedIds: { ...s.deletedIds, [id]: new Date().toISOString() },
         })),
       toggleTaskDone: (taskId, dateIso) =>
         set((s) => {
@@ -159,7 +170,11 @@ export const useStore = create<AppState>()(
             return { ...t, doneBy }
           }),
         })),
-      removeTodo: (id) => set((s) => ({ todos: s.todos.filter((t) => t.id !== id) })),
+      removeTodo: (id) =>
+        set((s) => ({
+          todos: s.todos.filter((t) => t.id !== id),
+          deletedIds: { ...s.deletedIds, [id]: new Date().toISOString() },
+        })),
       setTodoPriority: (id, priority) =>
         set((s) => ({ todos: s.todos.map((t) => (t.id === id ? { ...t, priority } : t)) })),
       addSubtask: (todoId, title) =>
@@ -197,6 +212,7 @@ export const useStore = create<AppState>()(
       removeRoutineItem: (type, id) =>
         set((s) => ({
           routines: { ...s.routines, [type]: s.routines[type].filter((i) => i.id !== id) },
+          deletedIds: { ...s.deletedIds, [id]: new Date().toISOString() },
         })),
       toggleRoutineItem: (type, itemId, dateIso) =>
         set((s) => {

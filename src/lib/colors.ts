@@ -43,3 +43,32 @@ function generateShades(baseHex: string): string[] {
 export function categoryColorChoicesForTheme(theme: Theme): string[] {
   return generateShades(THEME_BASE_HEX[theme])
 }
+
+const PALETTE_HUES = [
+  '#ef4444', // rouge
+  '#f97316', // orange
+  '#f59e0b', // ambre
+  '#eab308', // jaune
+  '#84cc16', // citron vert
+  '#22c55e', // vert
+  '#14b8a6', // sarcelle
+  '#06b6d4', // cyan
+  '#3b82f6', // bleu
+  '#6366f1', // indigo
+  '#8b5cf6', // violet
+  '#a855f7', // pourpre
+  '#d946ef', // fuchsia
+  '#ec4899', // rose vif
+  '#f43f5e', // rose rouge
+  '#64748b', // gris ardoise
+]
+
+function shadesForHue(baseHex: string): string[] {
+  return [mix(baseHex, WHITE, 0.55), mix(baseHex, WHITE, 0.22), baseHex, mix(baseHex, BLACK, 0.3)]
+}
+
+/** A wide multi-hue palette (each hue with a light/base/dark range), for
+ * picking a category color freely when adding or editing a task. */
+export function categoryColorPalette(): string[] {
+  return PALETTE_HUES.flatMap(shadesForHue)
+}

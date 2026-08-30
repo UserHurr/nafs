@@ -7,9 +7,8 @@ import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
 import { OwnerPicker } from './OwnerPicker'
 import { Icon, categoryIconChoices } from '../lib/icons'
-import { categoryColorChoicesForTheme } from '../lib/colors'
+import { categoryColorPalette } from '../lib/colors'
 import { useToastStore } from '../toastStore'
-import { useThemeStore } from '../themeStore'
 
 const weekdayLabels = ['D', 'L', 'M', 'M', 'J', 'V', 'S']
 
@@ -59,13 +58,12 @@ export function TaskFormModal({
   const notificationsEnabled = useStore((s) => s.notificationsEnabled)
   const setNotificationsEnabled = useStore((s) => s.setNotificationsEnabled)
 
-  const theme = useThemeStore((s) => s.theme)
-  const colorChoices = categoryColorChoicesForTheme(theme)
+  const colorChoices = categoryColorPalette()
 
   const [showNewCategory, setShowNewCategory] = useState(false)
   const [newCatName, setNewCatName] = useState('')
   const [newCatIcon, setNewCatIcon] = useState('sparkles')
-  const [newCatColor, setNewCatColor] = useState(colorChoices[4])
+  const [newCatColor, setNewCatColor] = useState(colorChoices[34])
 
   const toggleDay = (d: number) => {
     setDaysOfWeek((prev) => (prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d].sort()))

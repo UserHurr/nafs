@@ -2,15 +2,13 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useStore } from '../store'
 import { Icon, categoryIconChoices } from '../lib/icons'
-import { categoryColorChoicesForTheme } from '../lib/colors'
-import { useThemeStore } from '../themeStore'
+import { categoryColorPalette } from '../lib/colors'
 import type { Category } from '../types'
 
 function CategoryRow({ category }: { category: Category }) {
   const updateCategory = useStore((s) => s.updateCategory)
   const removeCategory = useStore((s) => s.removeCategory)
-  const theme = useThemeStore((s) => s.theme)
-  const colorChoices = categoryColorChoicesForTheme(theme)
+  const colorChoices = categoryColorPalette()
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(category.name)
   const [icon, setIcon] = useState(category.icon)

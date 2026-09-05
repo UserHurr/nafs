@@ -1,8 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { SHARED_OWNER, type Category, type Habit, type Member, type Priority, type RoutineItem, type RoutineType, type Task, type Todo } from './types'
+import type { Category, Habit, Member, Priority, RoutineItem, RoutineType, Task, Todo } from './types'
 import { myMemberId } from './syncStore'
 import { categoryColorChoicesForTheme } from './lib/colors'
+import { splitSharedOwner } from './lib/members'
 
 const uid = () => crypto.randomUUID()
 
@@ -278,35 +279,16 @@ export const useStore = create<AppState>()(
         // instead of one record tagged ownerId === SHARED_OWNER. Split any
         // pre-existing shared task into one copy per member so nobody's data
         // disappears, remapping their own completions onto their new copy.
+        // The same split also runs on every cloud-sync merge (see
+        // useCloudSync's applyPayload) since a shared task can still arrive
+        // at runtime from a partner device that hasn't updated yet.
         if (version < 2 && state && typeof state === 'object' && Array.isArray(state.tasks)) {
-          const tasks = state.tasks as Task[]
-          const members = (state.members as Member[]) ?? []
-          const taskCompletions = (state.taskCompletions as Record<string, boolean>) ?? {}
-          const sharedTasks = tasks.filter((t) => t.ownerId === SHARED_OWNER)
-          if (sharedTasks.length > 0 && members.length > 0) {
-            const idMap = new Map<string, Record<string, string>>()
-            const splitTasks: Task[] = []
-            for (const task of sharedTasks) {
-              const perMember: Record<string, string> = {}
-              for (const member of members) {
-                const newId = uid()
-                perMember[member.id] = newId
-                splitTasks.push({ ...task, id: newId, ownerId: member.id })
-              }
-              idMap.set(task.id, perMember)
-            }
-            const nextCompletions: Record<string, boolean> = {}
-            for (const [key, value] of Object.entries(taskCompletions)) {
-              const [taskId, dateIso, memberId] = key.split('_')
-              const newId = idMap.get(taskId)?.[memberId]
-              nextCompletions[newId ? `${newId}_${dateIso}_${memberId}` : key] = value
-            }
-            state = {
-              ...state,
-              tasks: [...tasks.filter((t) => t.ownerId !== SHARED_OWNER), ...splitTasks],
-              taskCompletions: nextCompletions,
-            }
-          }
+          const { tasks, taskCompletions } = splitSharedOwner(
+            state.tasks as Task[],
+            (state.members as Member[]) ?? [],
+            (state.taskCompletions as Record<string, boolean>) ?? {},
+          )
+          state = { ...state, tasks, taskCompletions }
         }
         return state
       },

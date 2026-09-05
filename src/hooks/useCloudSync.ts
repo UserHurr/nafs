@@ -3,6 +3,7 @@ import { useStore } from '../store'
 import { useSyncStore } from '../syncStore'
 import { generateSyncCode, mergePayloads, pullState, pushState, type SyncPayload } from '../lib/sync'
 import { supabaseConfigured } from '../lib/supabase'
+import { splitSharedOwner } from '../lib/members'
 
 const PULL_INTERVAL_MS = 20_000
 const PUSH_DEBOUNCE_MS = 1500
@@ -28,7 +29,11 @@ function extractPayload(): SyncPayload {
 }
 
 function applyPayload(payload: SyncPayload) {
-  useStore.setState(payload)
+  // A partner device still on an older build (or a payload merged before it
+  // picked up the split) can hand us a task still tagged with the old
+  // shared "Nous" owner — normalize it here too, not just at store boot.
+  const { tasks, taskCompletions } = splitSharedOwner(payload.tasks, payload.members, payload.taskCompletions)
+  useStore.setState({ ...payload, tasks, taskCompletions })
 }
 
 export function useCloudSync() {

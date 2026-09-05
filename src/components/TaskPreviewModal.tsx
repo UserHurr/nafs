@@ -1,7 +1,7 @@
 import { Bell, Check, Pencil, Repeat } from 'lucide-react'
 import { useStore } from '../store'
 import { myMemberId } from '../syncStore'
-import { isShared, taskCompletionKey } from '../lib/members'
+import { taskCompletionKey } from '../lib/members'
 import { Icon } from '../lib/icons'
 import { useConfettiBurst } from './Confetti'
 import { vibrateDone } from '../lib/haptics'
@@ -26,10 +26,7 @@ export function TaskPreviewModal({
 
   const me = myMemberId()
   const done = !!taskCompletions[taskCompletionKey(task.id, dateIso, me)]
-  const shared = isShared(task.ownerId) && members.length > 1
-  const partner = shared ? members.find((m) => m.id !== me) : undefined
-  const partnerDone = partner ? !!taskCompletions[taskCompletionKey(task.id, dateIso, partner.id)] : false
-  const owner = !shared ? members.find((m) => m.id === task.ownerId) : undefined
+  const owner = members.find((m) => m.id === task.ownerId)
 
   const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!done) {
@@ -78,11 +75,6 @@ export function TaskPreviewModal({
               <Icon name={owner.icon} size={13} /> {owner.name}
             </span>
           )}
-          {shared && (
-            <span className="chip">
-              <Icon name="users" size={13} /> Nous
-            </span>
-          )}
         </div>
 
         {task.notes && <div className="preview-notes">{task.notes}</div>}
@@ -91,15 +83,6 @@ export function TaskPreviewModal({
           <span className="qada-check-circle">{done && <Check size={18} strokeWidth={3} />}</span>
           <span>{done ? 'Terminée' : 'Marquer comme faite'}</span>
         </button>
-
-        {partner && (
-          <div className="stats-sub row-gap" style={{ marginTop: 10 }}>
-            <span className={`partner-badge ${partnerDone ? 'partner-badge-done' : ''}`}>
-              <Icon name={partner.icon} size={14} />
-            </span>
-            {partner.name} {partnerDone ? 'a terminé' : "n'a pas encore terminé"}
-          </div>
-        )}
 
         <div className="modal-actions">
           <button className="btn-ghost" onClick={onClose}>

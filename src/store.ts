@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Category, Habit, Member, Priority, RoutineItem, RoutineType, Task, Todo } from './types'
+import { SHARED_OWNER, type Category, type Habit, type Member, type Priority, type RoutineItem, type RoutineType, type Task, type Todo } from './types'
 import { myMemberId } from './syncStore'
 import { categoryColorChoicesForTheme } from './lib/colors'
 
@@ -261,9 +261,9 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'nafs-store-v3',
-      version: 1,
+      version: 2,
       migrate: (persisted: unknown, version) => {
-        const state = persisted as Record<string, unknown>
+        let state = persisted as Record<string, unknown>
         if (version < 1 && state && typeof state === 'object' && 'qadaCompletions' in state) {
           const qadaCompletions = state.qadaCompletions as Record<string, boolean>
           const qadaDayCounts: Record<string, number> = {}
@@ -271,7 +271,42 @@ export const useStore = create<AppState>()(
             if (v) qadaDayCounts[k] = 1
           }
           const { qadaCompletions: _old, ...rest } = state
-          return { ...rest, qadaDayCounts }
+          state = { ...rest, qadaDayCounts }
+        }
+        // The shared "Nous" pseudo-owner on Task no longer exists: a task
+        // created "for us" is now a real, independent copy per member
+        // instead of one record tagged ownerId === SHARED_OWNER. Split any
+        // pre-existing shared task into one copy per member so nobody's data
+        // disappears, remapping their own completions onto their new copy.
+        if (version < 2 && state && typeof state === 'object' && Array.isArray(state.tasks)) {
+          const tasks = state.tasks as Task[]
+          const members = (state.members as Member[]) ?? []
+          const taskCompletions = (state.taskCompletions as Record<string, boolean>) ?? {}
+          const sharedTasks = tasks.filter((t) => t.ownerId === SHARED_OWNER)
+          if (sharedTasks.length > 0 && members.length > 0) {
+            const idMap = new Map<string, Record<string, string>>()
+            const splitTasks: Task[] = []
+            for (const task of sharedTasks) {
+              const perMember: Record<string, string> = {}
+              for (const member of members) {
+                const newId = uid()
+                perMember[member.id] = newId
+                splitTasks.push({ ...task, id: newId, ownerId: member.id })
+              }
+              idMap.set(task.id, perMember)
+            }
+            const nextCompletions: Record<string, boolean> = {}
+            for (const [key, value] of Object.entries(taskCompletions)) {
+              const [taskId, dateIso, memberId] = key.split('_')
+              const newId = idMap.get(taskId)?.[memberId]
+              nextCompletions[newId ? `${newId}_${dateIso}_${memberId}` : key] = value
+            }
+            state = {
+              ...state,
+              tasks: [...tasks.filter((t) => t.ownerId !== SHARED_OWNER), ...splitTasks],
+              taskCompletions: nextCompletions,
+            }
+          }
         }
         return state
       },

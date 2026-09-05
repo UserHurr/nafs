@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Bell, Clock, Pin, Repeat, Trash2 } from 'lucide-react'
 import { useStore } from '../store'
-import type { Recurrence, RecurrenceFreq, Task, TimeType } from '../types'
+import { SHARED_OWNER, type Recurrence, type RecurrenceFreq, type Task, type TimeType } from '../types'
 import { minutesToTime, timeToMinutes, toIso } from '../lib/dates'
 import { requestNotificationPermission } from '../lib/notifications'
 import { myMemberId } from '../syncStore'
@@ -30,6 +30,7 @@ export function TaskFormModal({
 }) {
   const categories = useStore((s) => s.categories)
   const addCategory = useStore((s) => s.addCategory)
+  const members = useStore((s) => s.members)
   const addTask = useStore((s) => s.addTask)
   const updateTask = useStore((s) => s.updateTask)
   const removeTask = useStore((s) => s.removeTask)
@@ -81,9 +82,8 @@ export function TaskFormModal({
         }
       : undefined
 
-    const payload = {
+    const basePayload = {
       title: title.trim(),
-      ownerId,
       categoryId,
       timeType,
       startTime: timeType === 'timed' ? startTime : undefined,
@@ -94,10 +94,21 @@ export function TaskFormModal({
       reminder: timeType === 'timed' ? reminder : undefined,
     }
 
-    if (editingTask) {
-      updateTask(editingTask.id, payload)
+    if (ownerId === SHARED_OWNER) {
+      // "Nous" is not stored as a pseudo-owner anymore — it fans the task out
+      // as a real, independent copy on every collaborator's own calendar.
+      if (editingTask) {
+        updateTask(editingTask.id, { ...basePayload, ownerId: editingTask.ownerId })
+        members
+          .filter((m) => m.id !== editingTask.ownerId)
+          .forEach((m) => addTask({ ...basePayload, ownerId: m.id }))
+      } else {
+        members.forEach((m) => addTask({ ...basePayload, ownerId: m.id }))
+      }
+    } else if (editingTask) {
+      updateTask(editingTask.id, { ...basePayload, ownerId })
     } else {
-      addTask(payload)
+      addTask({ ...basePayload, ownerId })
     }
     onClose()
   }

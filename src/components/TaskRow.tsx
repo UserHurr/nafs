@@ -3,7 +3,7 @@ import type { Task } from '../types'
 import { useStore } from '../store'
 import { useConfettiBurst } from './Confetti'
 import { myMemberId } from '../syncStore'
-import { isShared, taskCompletionKey } from '../lib/members'
+import { taskCompletionKey } from '../lib/members'
 import { Icon } from '../lib/icons'
 import { vibrateDone } from '../lib/haptics'
 
@@ -17,17 +17,10 @@ export function TaskRow({
   onEdit: () => void
 }) {
   const category = useStore((s) => s.categories.find((c) => c.id === task.categoryId))
-  const members = useStore((s) => s.members)
   const me = myMemberId()
   const done = useStore((s) => !!s.taskCompletions[taskCompletionKey(task.id, dateIso, me)])
   const toggleTaskDone = useStore((s) => s.toggleTaskDone)
   const { fire, node } = useConfettiBurst()
-
-  const shared = isShared(task.ownerId) && members.length > 1
-  const partner = shared ? members.find((m) => m.id !== me) : undefined
-  const partnerDone = useStore((s) =>
-    partner ? !!s.taskCompletions[taskCompletionKey(task.id, dateIso, partner.id)] : false,
-  )
 
   const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!done) {
@@ -51,11 +44,6 @@ export function TaskRow({
         {task.recurrence && <Repeat size={13} className="task-recurring" />}
         {task.reminder && <Bell size={13} className="task-recurring" />}
       </button>
-      {partner && (
-        <span className={`partner-badge ${partnerDone ? 'partner-badge-done' : ''}`} title={partner.name}>
-          <Icon name={partner.icon} size={14} />
-        </span>
-      )}
     </div>
   )
 }
